@@ -1,6 +1,5 @@
 // LeafletWeather.ts
 import L, { Map as LeafletMap } from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { Properties } from "./interface/properties.interface";
 import clearDayStatic from "./images/static/clear-day.svg?raw";
 import cloudy1Static from "./images/static/cloudy-1-day.svg?raw";

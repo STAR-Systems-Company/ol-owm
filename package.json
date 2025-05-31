@@ -1,0 +1,28 @@
+{
+  "name": "ol-owm",
+  "version": "1.0.0",
+  "description": "Display weather on Leaflet and OpenLayers maps using OpenWeatherMap",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "vite"
+  },
+  "keywords": [
+    "weather",
+    "leaflet",
+    "openlayers",
+    "openweathermap"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "ol": "^10.5.0"
+  },
+  "devDependencies": {
+    "@types/leaflet": "^1.9.18",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

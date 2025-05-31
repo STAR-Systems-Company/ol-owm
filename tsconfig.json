@@ -5,9 +5,10 @@
     "moduleResolution": "node",
     "module": "ESNext",
     "declaration": true,
-    "outDir": "dist",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true
   },
-  "include": ["src", "demo", "src/types"]
+  "include": ["src", "src/types"]
 }

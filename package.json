@@ -1,6 +1,6 @@
 {
   "name": "ol-owm",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Weather layer for OpenLayers and Leaflet using OpenWeatherMap",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

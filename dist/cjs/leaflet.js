@@ -7,6 +7,7 @@ exports.LeafletWeather = void 0;
 // LeafletWeather.ts
 const leaflet_1 = __importDefault(require("leaflet"));
 const get_svg_image_1 = require("./hoocks/get.svg.image");
+const layers_1 = require("./layers");
 const defaultProperties = {
     iconAnimated: false,
 };
@@ -28,6 +29,8 @@ function formatUnixTime(timestamp, timezoneOffset) {
 }
 class LeafletWeather {
     constructor(map, owmKey, properties = defaultProperties) {
+        this.activeTileLayer = null;
+        this.activeLayerKey = null;
         this.update = async () => {
             const zoom = Math.floor(this.map.getZoom());
             const bounds = this.map.getBounds();
@@ -148,6 +151,37 @@ class LeafletWeather {
     }
     status() {
         return !!this.layerGroup;
+    }
+    layers() {
+        return layers_1.layers.map((x) => {
+            return {
+                name: x.name,
+                key: x.key,
+            };
+        });
+    }
+    setLayer(key) {
+        // Удаляем текущий слой, если он есть
+        if (this.activeTileLayer) {
+            this.map.removeLayer(this.activeTileLayer);
+            this.activeTileLayer = null;
+            this.activeLayerKey = null;
+        }
+        // Если key не передан, просто выходим
+        if (!key)
+            return;
+        const layer = layers_1.layers.find((x) => x.key === key);
+        if (!layer) {
+            console.warn("Layer not found for key:", key);
+            return;
+        }
+        const tileLayer = leaflet_1.default.tileLayer(layer.url + this.owmKey, {
+            opacity: 0.7,
+            attribution: "&copy; <a href='https://openweathermap.org/'>OpenWeatherMap</a>",
+        });
+        tileLayer.addTo(this.map);
+        this.activeTileLayer = tileLayer;
+        this.activeLayerKey = key;
     }
     async show() {
         this.map.doubleClickZoom.disable();

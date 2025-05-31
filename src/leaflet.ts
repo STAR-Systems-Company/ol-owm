@@ -1,8 +1,9 @@
 // LeafletWeather.ts
-import L, { Map as LeafletMap } from "leaflet";
+import L, { Map as LeafletMap, TileLayer } from "leaflet";
 import { Properties } from "./interface/properties.interface";
-import { getWeatherIcon } from "./weather-icons";
 import { getSvgImage } from "./hoocks/get.svg.image";
+import { layers } from "./layers";
+import { Layer } from "./interface/layer.interface";
 
 const defaultProperties = {
   iconAnimated: false,
@@ -36,6 +37,8 @@ export class LeafletWeather {
   private properties: Properties;
   private layerGroup?: L.LayerGroup;
   private popup: L.Popup;
+  private activeTileLayer: TileLayer | null = null;
+  private activeLayerKey: string | null = null;
 
   constructor(
     map: LeafletMap,
@@ -50,6 +53,43 @@ export class LeafletWeather {
 
   status() {
     return !!this.layerGroup;
+  }
+
+  layers() {
+    return layers.map((x: Layer) => {
+      return {
+        name: x.name,
+        key: x.key,
+      };
+    });
+  }
+
+  setLayer(key: string | null) {
+    // Удаляем текущий слой, если он есть
+    if (this.activeTileLayer) {
+      this.map.removeLayer(this.activeTileLayer);
+      this.activeTileLayer = null;
+      this.activeLayerKey = null;
+    }
+
+    // Если key не передан, просто выходим
+    if (!key) return;
+
+    const layer = layers.find((x) => x.key === key);
+    if (!layer) {
+      console.warn("Layer not found for key:", key);
+      return;
+    }
+
+    const tileLayer = L.tileLayer(layer.url + this.owmKey, {
+      opacity: 0.7,
+      attribution:
+        "&copy; <a href='https://openweathermap.org/'>OpenWeatherMap</a>",
+    });
+
+    tileLayer.addTo(this.map);
+    this.activeTileLayer = tileLayer;
+    this.activeLayerKey = key;
   }
 
   async show() {

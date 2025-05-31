@@ -9,8 +9,15 @@ export declare class OpenLayersWeather {
     private doubleClickZoom?;
     private layer?;
     private onMoveEnd;
+    private tileLayer;
+    private activeKey;
     constructor(map: OLMap, owmKey: string, properties?: Properties);
     status(): boolean;
+    layers(): {
+        name: string;
+        key: string;
+    }[];
+    setLayer(key: string | null): void;
     show(): Promise<void>;
     hide(): void;
     private update;

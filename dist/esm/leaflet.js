@@ -1,6 +1,7 @@
 // LeafletWeather.ts
 import L from "leaflet";
 import { getSvgImage } from "./hoocks/get.svg.image";
+import { layers } from "./layers";
 const defaultProperties = {
     iconAnimated: false,
 };
@@ -26,6 +27,8 @@ export class LeafletWeather {
     properties;
     layerGroup;
     popup;
+    activeTileLayer = null;
+    activeLayerKey = null;
     constructor(map, owmKey, properties = defaultProperties) {
         this.map = map;
         this.owmKey = owmKey;
@@ -34,6 +37,37 @@ export class LeafletWeather {
     }
     status() {
         return !!this.layerGroup;
+    }
+    layers() {
+        return layers.map((x) => {
+            return {
+                name: x.name,
+                key: x.key,
+            };
+        });
+    }
+    setLayer(key) {
+        // Удаляем текущий слой, если он есть
+        if (this.activeTileLayer) {
+            this.map.removeLayer(this.activeTileLayer);
+            this.activeTileLayer = null;
+            this.activeLayerKey = null;
+        }
+        // Если key не передан, просто выходим
+        if (!key)
+            return;
+        const layer = layers.find((x) => x.key === key);
+        if (!layer) {
+            console.warn("Layer not found for key:", key);
+            return;
+        }
+        const tileLayer = L.tileLayer(layer.url + this.owmKey, {
+            opacity: 0.7,
+            attribution: "&copy; <a href='https://openweathermap.org/'>OpenWeatherMap</a>",
+        });
+        tileLayer.addTo(this.map);
+        this.activeTileLayer = tileLayer;
+        this.activeLayerKey = key;
     }
     async show() {
         this.map.doubleClickZoom.disable();

@@ -1,11 +1,14 @@
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
+import Overlay from "ol/Overlay";
+import TileLayer from "ol/layer/Tile";
 import { Style, Icon, Text, Fill, Stroke } from "ol/style";
 import { toLonLat } from "ol/proj";
-import Overlay from "ol/Overlay";
 import { DoubleClickZoom } from "ol/interaction";
 import { getSvgImage } from "./hoocks/get.svg.image";
+import { layers } from "./layers";
+import { XYZ } from "ol/source";
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
     const y = Math.floor(((1 -
@@ -32,6 +35,8 @@ export class OpenLayersWeather {
     doubleClickZoom;
     layer;
     onMoveEnd;
+    tileLayer = null;
+    activeKey = null;
     constructor(map, owmKey, properties = defaultProperties) {
         this.map = map;
         this.owmKey = owmKey;
@@ -42,6 +47,40 @@ export class OpenLayersWeather {
     }
     status() {
         return !!this.layer;
+    }
+    layers() {
+        return layers.map((x) => {
+            return {
+                name: x.name,
+                key: x.key,
+            };
+        });
+    }
+    setLayer(key) {
+        if (key === this.activeKey)
+            return;
+        // Удалить текущий слой
+        if (this.tileLayer) {
+            this.map.removeLayer(this.tileLayer);
+            this.tileLayer = null;
+            this.activeKey = null;
+        }
+        // Если ключ null — только удалить
+        if (!key)
+            return;
+        const layerData = layers.find((l) => l.key === key);
+        if (!layerData)
+            return;
+        const source = new XYZ({
+            url: layerData.url + this.owmKey,
+        });
+        const tileLayer = new TileLayer({
+            source,
+            zIndex: 50,
+        });
+        this.map.addLayer(tileLayer);
+        this.tileLayer = tileLayer;
+        this.activeKey = key;
     }
     async show() {
         this.doubleClickZoom = this.map

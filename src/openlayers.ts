@@ -2,13 +2,16 @@ import { Map as OLMap } from "ol";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
+import Overlay from "ol/Overlay";
+import TileLayer from "ol/layer/Tile";
 import { Style, Icon, Text, Fill, Stroke } from "ol/style";
 import { toLonLat } from "ol/proj";
 import { Properties } from "./interface/properties.interface";
-import Overlay from "ol/Overlay";
 import { DoubleClickZoom } from "ol/interaction";
-import { getWeatherIcon } from "./weather-icons";
 import { getSvgImage } from "./hoocks/get.svg.image";
+import { layers } from "./layers";
+import { Layer } from "./interface/layer.interface";
+import { XYZ } from "ol/source";
 
 function lonLatToTile(lon: number, lat: number, zoom: number) {
   const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -44,6 +47,9 @@ export class OpenLayersWeather {
   private layer?: VectorLayer;
   private onMoveEnd: () => void;
 
+  private tileLayer: TileLayer | null = null;
+  private activeKey: string | null = null;
+
   constructor(
     map: OLMap,
     owmKey: string,
@@ -60,6 +66,45 @@ export class OpenLayersWeather {
 
   status() {
     return !!this.layer;
+  }
+
+  layers() {
+    return layers.map((x: Layer) => {
+      return {
+        name: x.name,
+        key: x.key,
+      };
+    });
+  }
+
+  setLayer(key: string | null) {
+    if (key === this.activeKey) return;
+
+    // Удалить текущий слой
+    if (this.tileLayer) {
+      this.map.removeLayer(this.tileLayer);
+      this.tileLayer = null;
+      this.activeKey = null;
+    }
+
+    // Если ключ null — только удалить
+    if (!key) return;
+
+    const layerData = layers.find((l) => l.key === key);
+    if (!layerData) return;
+
+    const source = new XYZ({
+      url: layerData.url + this.owmKey,
+    });
+
+    const tileLayer = new TileLayer({
+      source,
+      zIndex: 50,
+    });
+
+    this.map.addLayer(tileLayer);
+    this.tileLayer = tileLayer;
+    this.activeKey = key;
   }
 
   async show() {

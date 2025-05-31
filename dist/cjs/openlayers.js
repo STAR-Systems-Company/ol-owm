@@ -7,11 +7,14 @@ exports.OpenLayersWeather = void 0;
 const Vector_1 = __importDefault(require("ol/layer/Vector"));
 const Vector_2 = __importDefault(require("ol/source/Vector"));
 const GeoJSON_1 = __importDefault(require("ol/format/GeoJSON"));
+const Overlay_1 = __importDefault(require("ol/Overlay"));
+const Tile_1 = __importDefault(require("ol/layer/Tile"));
 const style_1 = require("ol/style");
 const proj_1 = require("ol/proj");
-const Overlay_1 = __importDefault(require("ol/Overlay"));
 const interaction_1 = require("ol/interaction");
 const get_svg_image_1 = require("./hoocks/get.svg.image");
+const layers_1 = require("./layers");
+const source_1 = require("ol/source");
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
     const y = Math.floor(((1 -
@@ -31,6 +34,8 @@ function formatUnixTime(timestamp, timezoneOffset) {
 const defaultProperties = {};
 class OpenLayersWeather {
     constructor(map, owmKey, properties = defaultProperties) {
+        this.tileLayer = null;
+        this.activeKey = null;
         this.onMapClick = () => {
             if (this.popupOverlay) {
                 this.popupOverlay.setPosition(undefined);
@@ -95,6 +100,40 @@ class OpenLayersWeather {
     }
     status() {
         return !!this.layer;
+    }
+    layers() {
+        return layers_1.layers.map((x) => {
+            return {
+                name: x.name,
+                key: x.key,
+            };
+        });
+    }
+    setLayer(key) {
+        if (key === this.activeKey)
+            return;
+        // Удалить текущий слой
+        if (this.tileLayer) {
+            this.map.removeLayer(this.tileLayer);
+            this.tileLayer = null;
+            this.activeKey = null;
+        }
+        // Если ключ null — только удалить
+        if (!key)
+            return;
+        const layerData = layers_1.layers.find((l) => l.key === key);
+        if (!layerData)
+            return;
+        const source = new source_1.XYZ({
+            url: layerData.url + this.owmKey,
+        });
+        const tileLayer = new Tile_1.default({
+            source,
+            zIndex: 50,
+        });
+        this.map.addLayer(tileLayer);
+        this.tileLayer = tileLayer;
+        this.activeKey = key;
     }
     async show() {
         this.doubleClickZoom = this.map

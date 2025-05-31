@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // LeafletWeather.ts
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import clearDayStatic from "./images/static/clear-day.svg?raw";
 import cloudy1Static from "./images/static/cloudy-1-day.svg?raw";
 import cloudyStatic from "./images/static/cloudy.svg?raw";

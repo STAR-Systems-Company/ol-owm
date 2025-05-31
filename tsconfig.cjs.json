@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "ES2019",
+    "module": "CommonJS",
     "lib": ["es2019", "dom"],
     "moduleResolution": "node",
-    "declaration": true,
-    "outDir": "./dist",
+    "declaration": false,
+    "outDir": "./dist/cjs",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true
   },
-  "include": ["src", "src/types"]
+  "include": ["src"]
 }

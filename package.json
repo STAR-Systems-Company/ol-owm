@@ -1,11 +1,17 @@
 {
   "name": "ol-owm",
-  "version": "2.0.5",
+  "version": "2.1.1",
   "description": "Weather layer for OpenLayers and Leaflet using OpenWeatherMap",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "types": "./dist/esm/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    "import": "./dist/esm/index.js",
+    "require": "./dist/cjs/index.js"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
     "prepare": "npm run build",
     "dev": "vite"
   },

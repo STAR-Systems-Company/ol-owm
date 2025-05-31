@@ -10,6 +10,7 @@ export declare class OpenLayersWeather {
     private layer?;
     private onMoveEnd;
     constructor(map: OLMap, owmKey: string, properties?: Properties);
+    status(): boolean;
     show(): Promise<void>;
     hide(): void;
     private update;

@@ -7,6 +7,7 @@ export declare class LeafletWeather {
     private layerGroup?;
     private popup;
     constructor(map: LeafletMap, owmKey: string, properties?: Properties);
+    status(): boolean;
     show(): Promise<void>;
     hide(): void;
     private update;

@@ -146,6 +146,9 @@ class LeafletWeather {
         this.properties = properties;
         this.popup = leaflet_1.default.popup();
     }
+    status() {
+        return !!this.layerGroup;
+    }
     async show() {
         this.map.doubleClickZoom.disable();
         this.map.on("moveend", this.update);

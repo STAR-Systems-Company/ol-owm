@@ -32,6 +32,9 @@ export class LeafletWeather {
         this.properties = properties;
         this.popup = L.popup();
     }
+    status() {
+        return !!this.layerGroup;
+    }
     async show() {
         this.map.doubleClickZoom.disable();
         this.map.on("moveend", this.update);

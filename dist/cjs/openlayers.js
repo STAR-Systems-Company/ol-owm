@@ -93,6 +93,9 @@ class OpenLayersWeather {
             this.update();
         };
     }
+    status() {
+        return !!this.layer;
+    }
     async show() {
         this.doubleClickZoom = this.map
             .getInteractions()

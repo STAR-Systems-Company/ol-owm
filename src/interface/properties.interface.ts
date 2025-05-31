@@ -1,3 +1,1 @@
-export interface Properties {
-  iconAnimated: boolean;
-}
+export interface Properties {}

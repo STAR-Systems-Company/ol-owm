@@ -9,13 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // LeafletWeather.ts
 import L from "leaflet";
-import clearDayStatic from "./images/static/clear-day.svg?raw";
-import cloudy1Static from "./images/static/cloudy-1-day.svg?raw";
-import cloudyStatic from "./images/static/cloudy.svg?raw";
-import clearDayAnimated from "./images/animated/clear-day.svg?raw";
-import cloudy1Animated from "./images/animated/cloudy-1-day.svg?raw";
-import cloudyAnimated from "./images/animated/cloudy.svg?raw";
-import { getWeatherIcon } from "./weather-icons";
+import { getSvgImage } from "./hoocks/get.svg.image";
 const defaultProperties = {
     iconAnimated: false,
 };
@@ -69,8 +63,8 @@ export class LeafletWeather {
             for (const feature of features) {
                 const { geometry, properties } = feature;
                 const [lon, lat] = geometry.coordinates;
-                const { city, clouds = 0, wind_speed = 0, temp = 0 } = properties;
-                const rawSvg = this.getSVGIcon(clouds);
+                const { city, wind_speed = 0, temp = 0 } = properties;
+                const rawSvg = getSvgImage(properties);
                 const icon = L.divIcon({
                     className: "", // убираем стандартные стили Leaflet
                     html: `
@@ -92,7 +86,7 @@ export class LeafletWeather {
             ">
               ${parseInt(temp)}°C
             </div>
-            <img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(rawSvg)}" style="width: 42px; height: 42px; object-fit: cover;" alt="weather" />
+            <img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(rawSvg)}" style="width: 32px; height: 32px; object-fit: cover;" alt="weather" />
             <div style="
               color: #000;
               font-size: 10px;
@@ -112,24 +106,21 @@ export class LeafletWeather {
         });
         this.onMapDoubleClick = (e) => __awaiter(this, void 0, void 0, function* () {
             const { lat, lng } = e.latlng;
-            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&lang=ru&appid=${this.owmKey}`;
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&units=metric&lang=en&appid=${this.owmKey}`;
             try {
                 const res = yield fetch(url);
                 const data = yield res.json();
                 const { name, weather, main, wind, sys, timezone, clouds, visibility } = data;
-                const iconCode = weather[0].icon;
-                const isNight = iconCode.includes("n");
-                const conditionKey = `${weather[0].main
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}-${isNight ? "night" : "day"}`;
-                const rawSvg = getWeatherIcon(conditionKey || "cloudy-day", this.properties.iconAnimated);
                 const content = `
       <div style="font-family: 'Segoe UI', sans-serif; color: #1a1a1a; min-width: 240px;">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-          <img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(rawSvg)}" width="48" height="48" />
+          <img src="https://openweathermap.org/img/wn/${weather === null || weather === void 0 ? void 0 : weather[0].icon}@2x.png" width="48" height="48" style="
+              background: #404040;
+              border-radius: 10px;
+            "/>
           <div>
             <div style="font-size: 16px; font-weight: 600;">${name || "Unknown"}, ${sys.country}</div>
-            <div style="font-size: 13px; color: #666;">${weather[0].description}</div>
+            <div style="font-size: 13px; color: #666;">${weather === null || weather === void 0 ? void 0 : weather[0].description}</div>
           </div>
         </div>
         <div style="font-size: 14px; line-height: 1.7;">
@@ -163,6 +154,9 @@ export class LeafletWeather {
             this.map.doubleClickZoom.disable();
             this.map.on("moveend", this.update);
             this.map.on("dblclick", this.onMapDoubleClick);
+            this.map.on("click", () => {
+                this.map.closePopup();
+            });
             yield this.update();
         });
     }
@@ -173,13 +167,5 @@ export class LeafletWeather {
         if (this.layerGroup) {
             this.map.removeLayer(this.layerGroup);
         }
-    }
-    getSVGIcon(clouds) {
-        const animated = this.properties.iconAnimated;
-        if (clouds > 60)
-            return animated ? cloudyAnimated : cloudyStatic;
-        if (clouds > 20)
-            return animated ? cloudy1Animated : cloudy1Static;
-        return animated ? clearDayAnimated : clearDayStatic;
     }
 }

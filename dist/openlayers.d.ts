@@ -13,5 +13,6 @@ export declare class OpenLayersWeather {
     show(): Promise<void>;
     hide(): void;
     private update;
+    private onMapClick;
     private onMapDoubleClick;
 }

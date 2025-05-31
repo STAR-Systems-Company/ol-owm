@@ -6,20 +6,9 @@ import { Style, Icon, Text, Fill, Stroke } from "ol/style";
 import { toLonLat } from "ol/proj";
 import { Properties } from "./interface/properties.interface";
 import Overlay from "ol/Overlay";
-import {
-  defaults as defaultInteractions,
-  DoubleClickZoom,
-} from "ol/interaction";
-
-// импорт svg как строки
-import clearDayStatic from "./images/static/clear-day.svg?raw";
-import cloudy1Static from "./images/static/cloudy-1-day.svg?raw";
-import cloudyStatic from "./images/static/cloudy.svg?raw";
-
-import clearDayAnimated from "./images/animated/clear-day.svg?raw";
-import cloudy1Animated from "./images/animated/cloudy-1-day.svg?raw";
-import cloudyAnimated from "./images/animated/cloudy.svg?raw";
+import { DoubleClickZoom } from "ol/interaction";
 import { getWeatherIcon } from "./weather-icons";
+import { getSvgImage } from "./hoocks/get.svg.image";
 
 function lonLatToTile(lon: number, lat: number, zoom: number) {
   const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -43,9 +32,7 @@ function formatUnixTime(timestamp: number, timezoneOffset: number): string {
   return `${hours}:${minutes}`;
 }
 
-const defaultProperties = {
-  iconAnimated: false,
-};
+const defaultProperties = {};
 
 export class OpenLayersWeather {
   private map: OLMap;
@@ -101,11 +88,14 @@ export class OpenLayersWeather {
     this.map.addOverlay(this.popupOverlay);
     this.map.on("moveend", this.onMoveEnd);
     this.map.on("dblclick", this.onMapDoubleClick);
+    this.map.on("click", this.onMapClick);
+
     await this.update();
   }
 
   hide() {
     this.map.un("dblclick", this.onMapDoubleClick);
+    this.map.un("click", this.onMapClick);
 
     if (this.popupOverlay) {
       this.map.removeOverlay(this.popupOverlay);
@@ -160,22 +150,11 @@ export class OpenLayersWeather {
       features,
     });
 
-    const getSVGIcon = (clouds: number): string => {
-      const animated = this.properties.iconAnimated;
-
-      if (clouds > 60) {
-        return animated ? cloudyAnimated : cloudyStatic;
-      } else if (clouds > 20) {
-        return animated ? cloudy1Animated : cloudy1Static;
-      } else {
-        return animated ? clearDayAnimated : clearDayStatic;
-      }
-    };
-
     const styleFunction = (feature: any) => {
-      const { city, clouds = 0, wind_speed, temp } = feature.getProperties();
+      const { city, wind_speed, temp } = feature.getProperties();
 
-      const rawSvg = getSVGIcon(clouds);
+      const rawSvg = getSvgImage(feature.getProperties());
+
       const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
         rawSvg
       )}`;
@@ -184,7 +163,7 @@ export class OpenLayersWeather {
         new Style({
           image: new Icon({
             src: dataUrl,
-            scale: 0.8,
+            scale: 0.2,
           }),
 
           text: new Text({
@@ -197,7 +176,7 @@ export class OpenLayersWeather {
               color: "black",
               width: 2,
             }),
-            offsetY: 16,
+            offsetY: 20,
           }),
         }),
         new Style({
@@ -212,7 +191,7 @@ export class OpenLayersWeather {
               width: 2,
             }),
 
-            offsetY: -25,
+            offsetY: -16,
           }),
           zIndex: 9999999999,
         }),
@@ -228,7 +207,7 @@ export class OpenLayersWeather {
               width: 2,
             }),
             // offsetX: ,
-            offsetY: 28,
+            offsetY: 32,
           }),
           zIndex: 9999999999,
         }),
@@ -249,11 +228,17 @@ export class OpenLayersWeather {
     }
   }
 
+  private onMapClick = () => {
+    if (this.popupOverlay) {
+      this.popupOverlay.setPosition(undefined);
+    }
+  };
+
   private onMapDoubleClick = async (evt: any) => {
     const coord = toLonLat(evt.coordinate);
     const [lon, lat] = coord;
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=ru&appid=${this.owmKey}`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=en&appid=${this.owmKey}`;
 
     try {
       const res = await fetch(url);
@@ -263,27 +248,8 @@ export class OpenLayersWeather {
         data;
 
       const weatherData = weather[0];
-      const iconCode = weatherData.icon;
       const description = weatherData.description;
       const mainCondition = weatherData.main;
-      const isNight = iconCode.includes("n");
-
-      // Приводим к нижнему регистру, заменяем пробелы на дефисы
-      let baseKey = mainCondition.toLowerCase().replace(/\s+/g, "-");
-
-      // Проверка, есть ли day/night версия
-      let conditionKey = `${baseKey}-${isNight ? "night" : "day"}`;
-
-      console.log(conditionKey);
-      // Получаем SVG
-      const rawSvg = getWeatherIcon(
-        conditionKey || "cloudy-day",
-        this.properties.iconAnimated
-      );
-
-      const iconUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-        rawSvg
-      )}`;
 
       const sunrise = formatUnixTime(sys.sunrise, timezone);
       const sunset = formatUnixTime(sys.sunset, timezone);
@@ -291,10 +257,15 @@ export class OpenLayersWeather {
       this.popupElement.innerHTML = `
   <div style="font-family: 'Segoe UI', sans-serif; color: #1a1a1a; min-width: 240px;">
     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-      <img src="${iconUrl}" alt="${mainCondition}" width="48" height="48" style="    object-position: center;
+      <img src="https://openweathermap.org/img/wn/${
+        weather?.[0].icon
+      }@2x.png" alt="${mainCondition}" width="48" height="48" style=" object-position: center;
     object-fit: cover;
     width: 48px;
-    height: 48px;" />
+    height: 48px;
+    background: #404040;
+    border-radius: 10px;
+    " />
       <div>
         <div style="font-size: 16px; font-weight: 600;">${name || "Unknown"}, ${
         sys.country

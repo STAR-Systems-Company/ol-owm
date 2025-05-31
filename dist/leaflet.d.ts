@@ -10,6 +10,5 @@ export declare class LeafletWeather {
     show(): Promise<void>;
     hide(): void;
     private update;
-    private getSVGIcon;
     private onMapDoubleClick;
 }

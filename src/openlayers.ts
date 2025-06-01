@@ -10,8 +10,19 @@ import { Properties } from "./interface/properties.interface";
 import { DoubleClickZoom } from "ol/interaction";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
-import { Layer } from "./interface/layer.interface";
+import { LayerType } from "./interface/layer.interface";
 import { XYZ } from "ol/source";
+
+type WindData = {
+  u: number[];
+  v: number[];
+  nx: number;
+  ny: number;
+  lo1: number;
+  la1: number;
+  lo2: number;
+  la2: number;
+};
 
 function lonLatToTile(lon: number, lat: number, zoom: number) {
   const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -35,7 +46,9 @@ function formatUnixTime(timestamp: number, timezoneOffset: number): string {
   return `${hours}:${minutes}`;
 }
 
-const defaultProperties = {};
+const defaultProperties: Properties = {
+  lang: "en",
+};
 
 export class OpenLayersWeather {
   private map: OLMap;
@@ -48,7 +61,7 @@ export class OpenLayersWeather {
   private onMoveEnd: () => void;
 
   private tileLayer: TileLayer | null = null;
-  private activeKey: string | null = null;
+  public activeKey: string | null = null;
 
   constructor(
     map: OLMap,
@@ -69,7 +82,7 @@ export class OpenLayersWeather {
   }
 
   layers() {
-    return layers.map((x: Layer) => {
+    return layers.map((x: LayerType) => {
       return {
         name: x.name,
         key: x.key,
@@ -176,7 +189,7 @@ export class OpenLayersWeather {
     for (let x = minTile.x; x <= maxTile.x; x++) {
       for (let y = minTile.y; y <= maxTile.y; y++) {
         const tileKey = `${zoom}/${x}/${y}`;
-        const url = `https://b.maps.owm.io/weather/cities/${tileKey}.geojson?appid=${this.owmKey}`;
+        const url = `https://b.maps.owm.io/weather/cities/${tileKey}.geojson?appid=${this.owmKey}&lang=${this.properties.lang}`;
         requests.push(
           fetch(url)
             .then((r) => r.json())
@@ -287,7 +300,7 @@ export class OpenLayersWeather {
     const coord = toLonLat(evt.coordinate);
     const [lon, lat] = coord;
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=en&appid=${this.owmKey}`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=${this.properties.lang}&appid=${this.owmKey}`;
 
     try {
       const res = await fetch(url);

@@ -1,1 +1,3 @@
-export interface Properties {}
+export interface Properties {
+  lang: "ru" | "en" | "ua";
+}

@@ -27,4 +27,9 @@ exports.layers = [
         key: "temp_new",
         url: "https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=",
     },
+    {
+        name: "Wind arrows",
+        key: "WNDUV",
+        url: `https://maps.openweathermap.org/maps/2.0/weather/1h/WNDUV/{z}/{x}/{y}?date=${Math.floor(Date.now() / 1000)}&use_norm=true&arrow_step=16&appid=`,
+    },
 ];

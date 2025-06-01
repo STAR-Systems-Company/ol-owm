@@ -3,10 +3,10 @@ import L, { Map as LeafletMap, TileLayer } from "leaflet";
 import { Properties } from "./interface/properties.interface";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
-import { Layer } from "./interface/layer.interface";
+import { LayerType } from "./interface/layer.interface";
 
-const defaultProperties = {
-  iconAnimated: false,
+const defaultProperties: Properties = {
+  lang: "en",
 };
 
 function lonLatToTile(lon: number, lat: number, zoom: number) {
@@ -38,7 +38,7 @@ export class LeafletWeather {
   private layerGroup?: L.LayerGroup;
   private popup: L.Popup;
   private activeTileLayer: TileLayer | null = null;
-  private activeLayerKey: string | null = null;
+  public activeKey: string | null = null;
 
   constructor(
     map: LeafletMap,
@@ -56,7 +56,7 @@ export class LeafletWeather {
   }
 
   layers() {
-    return layers.map((x: Layer) => {
+    return layers.map((x: LayerType) => {
       return {
         name: x.name,
         key: x.key,
@@ -69,7 +69,7 @@ export class LeafletWeather {
     if (this.activeTileLayer) {
       this.map.removeLayer(this.activeTileLayer);
       this.activeTileLayer = null;
-      this.activeLayerKey = null;
+      this.activeKey = null;
     }
 
     // Если key не передан, просто выходим
@@ -89,7 +89,7 @@ export class LeafletWeather {
 
     tileLayer.addTo(this.map);
     this.activeTileLayer = tileLayer;
-    this.activeLayerKey = key;
+    this.activeKey = key;
   }
 
   async show() {

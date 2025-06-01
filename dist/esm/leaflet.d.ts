@@ -7,7 +7,7 @@ export declare class LeafletWeather {
     private layerGroup?;
     private popup;
     private activeTileLayer;
-    private activeLayerKey;
+    activeKey: string | null;
     constructor(map: LeafletMap, owmKey: string, properties?: Properties);
     status(): boolean;
     layers(): {

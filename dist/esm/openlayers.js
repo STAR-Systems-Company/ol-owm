@@ -25,7 +25,9 @@ function formatUnixTime(timestamp, timezoneOffset) {
     const minutes = date.getUTCMinutes().toString().padStart(2, "0");
     return `${hours}:${minutes}`;
 }
-const defaultProperties = {};
+const defaultProperties = {
+    lang: "en",
+};
 export class OpenLayersWeather {
     map;
     owmKey;
@@ -138,7 +140,7 @@ export class OpenLayersWeather {
         for (let x = minTile.x; x <= maxTile.x; x++) {
             for (let y = minTile.y; y <= maxTile.y; y++) {
                 const tileKey = `${zoom}/${x}/${y}`;
-                const url = `https://b.maps.owm.io/weather/cities/${tileKey}.geojson?appid=${this.owmKey}`;
+                const url = `https://b.maps.owm.io/weather/cities/${tileKey}.geojson?appid=${this.owmKey}&lang=${this.properties.lang}`;
                 requests.push(fetch(url)
                     .then((r) => r.json())
                     .then((geojson) => {
@@ -233,7 +235,7 @@ export class OpenLayersWeather {
     onMapDoubleClick = async (evt) => {
         const coord = toLonLat(evt.coordinate);
         const [lon, lat] = coord;
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=en&appid=${this.owmKey}`;
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=${this.properties.lang}&appid=${this.owmKey}`;
         try {
             const res = await fetch(url);
             const data = await res.json();

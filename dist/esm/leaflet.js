@@ -3,7 +3,7 @@ import L from "leaflet";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
 const defaultProperties = {
-    iconAnimated: false,
+    lang: "en",
 };
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -28,7 +28,7 @@ export class LeafletWeather {
     layerGroup;
     popup;
     activeTileLayer = null;
-    activeLayerKey = null;
+    activeKey = null;
     constructor(map, owmKey, properties = defaultProperties) {
         this.map = map;
         this.owmKey = owmKey;
@@ -51,7 +51,7 @@ export class LeafletWeather {
         if (this.activeTileLayer) {
             this.map.removeLayer(this.activeTileLayer);
             this.activeTileLayer = null;
-            this.activeLayerKey = null;
+            this.activeKey = null;
         }
         // Если key не передан, просто выходим
         if (!key)
@@ -67,7 +67,7 @@ export class LeafletWeather {
         });
         tileLayer.addTo(this.map);
         this.activeTileLayer = tileLayer;
-        this.activeLayerKey = key;
+        this.activeKey = key;
     }
     async show() {
         this.map.doubleClickZoom.disable();

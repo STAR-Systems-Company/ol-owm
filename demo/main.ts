@@ -19,7 +19,7 @@ const mapOL = new Map({
 const weatherOL = new OpenLayersWeather(
   mapOL,
   "b1b15e88fa797225412429c1c50c122a1",
-  { iconAnimated: true }
+  { lang: "ru" }
 );
 
 weatherOL.show();
@@ -34,9 +34,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const weatherLeaflet = new LeafletWeather(
   mapLeaflet,
   "b1b15e88fa797225412429c1c50c122a1",
-  {
-    iconAnimated: true,
-  }
+  { lang: "ru" }
 );
 weatherLeaflet.show();
 

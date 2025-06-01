@@ -10,7 +10,7 @@ export declare class OpenLayersWeather {
     private layer?;
     private onMoveEnd;
     private tileLayer;
-    private activeKey;
+    activeKey: string | null;
     constructor(map: OLMap, owmKey: string, properties?: Properties);
     status(): boolean;
     layers(): {

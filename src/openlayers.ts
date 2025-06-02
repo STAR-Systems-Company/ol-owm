@@ -12,17 +12,7 @@ import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
 import { LayerType } from "./interface/layer.interface";
 import { XYZ } from "ol/source";
-
-type WindData = {
-  u: number[];
-  v: number[];
-  nx: number;
-  ny: number;
-  lo1: number;
-  la1: number;
-  lo2: number;
-  la2: number;
-};
+import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
 
 function lonLatToTile(lon: number, lat: number, zoom: number) {
   const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -48,6 +38,8 @@ function formatUnixTime(timestamp: number, timezoneOffset: number): string {
 
 const defaultProperties: Properties = {
   lang: "en",
+  legend: true,
+  legendElement: "#map",
 };
 
 export class OpenLayersWeather {
@@ -93,15 +85,17 @@ export class OpenLayersWeather {
   setLayer(key: string | null) {
     if (key === this.activeKey) return;
 
-    // Удалить текущий слой
     if (this.tileLayer) {
+      removeLegend(this.properties.legendElement);
       this.map.removeLayer(this.tileLayer);
       this.tileLayer = null;
       this.activeKey = null;
     }
 
-    // Если ключ null — только удалить
-    if (!key) return;
+    if (!key) {
+      removeLegend(this.properties.legendElement);
+      return;
+    }
 
     const layerData = layers.find((l) => l.key === key);
     if (!layerData) return;
@@ -114,6 +108,10 @@ export class OpenLayersWeather {
       source,
       zIndex: 50,
     });
+
+    if (this.properties.legend && this.properties.legendElement) {
+      makeLegend(this.properties.legendElement, layerData);
+    }
 
     this.map.addLayer(tileLayer);
     this.tileLayer = tileLayer;

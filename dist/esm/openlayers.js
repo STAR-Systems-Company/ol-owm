@@ -9,6 +9,7 @@ import { DoubleClickZoom } from "ol/interaction";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
 import { XYZ } from "ol/source";
+import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
     const y = Math.floor(((1 -
@@ -27,6 +28,8 @@ function formatUnixTime(timestamp, timezoneOffset) {
 }
 const defaultProperties = {
     lang: "en",
+    legend: true,
+    legendElement: "#map",
 };
 export class OpenLayersWeather {
     map;
@@ -61,15 +64,16 @@ export class OpenLayersWeather {
     setLayer(key) {
         if (key === this.activeKey)
             return;
-        // Удалить текущий слой
         if (this.tileLayer) {
+            removeLegend(this.properties.legendElement);
             this.map.removeLayer(this.tileLayer);
             this.tileLayer = null;
             this.activeKey = null;
         }
-        // Если ключ null — только удалить
-        if (!key)
+        if (!key) {
+            removeLegend(this.properties.legendElement);
             return;
+        }
         const layerData = layers.find((l) => l.key === key);
         if (!layerData)
             return;
@@ -80,6 +84,9 @@ export class OpenLayersWeather {
             source,
             zIndex: 50,
         });
+        if (this.properties.legend && this.properties.legendElement) {
+            makeLegend(this.properties.legendElement, layerData);
+        }
         this.map.addLayer(tileLayer);
         this.tileLayer = tileLayer;
         this.activeKey = key;

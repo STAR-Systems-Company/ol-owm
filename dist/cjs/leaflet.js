@@ -8,8 +8,10 @@ exports.LeafletWeather = void 0;
 const leaflet_1 = __importDefault(require("leaflet"));
 const get_svg_image_1 = require("./hoocks/get.svg.image");
 const layers_1 = require("./layers");
+const make_lengnd_1 = require("./hoocks/make.lengnd");
 const defaultProperties = {
     lang: "en",
+    legend: true,
 };
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -161,24 +163,32 @@ class LeafletWeather {
         });
     }
     setLayer(key) {
+        if (key === this.activeKey)
+            return;
         // Удаляем текущий слой, если он есть
         if (this.activeTileLayer) {
+            (0, make_lengnd_1.removeLegend)(this.properties.legendElement);
             this.map.removeLayer(this.activeTileLayer);
             this.activeTileLayer = null;
             this.activeKey = null;
         }
         // Если key не передан, просто выходим
-        if (!key)
+        if (!key) {
+            (0, make_lengnd_1.removeLegend)(this.properties.legendElement);
             return;
-        const layer = layers_1.layers.find((x) => x.key === key);
-        if (!layer) {
+        }
+        const layerData = layers_1.layers.find((x) => x.key === key);
+        if (!layerData) {
             console.warn("Layer not found for key:", key);
             return;
         }
-        const tileLayer = leaflet_1.default.tileLayer(layer.url + this.owmKey, {
+        const tileLayer = leaflet_1.default.tileLayer(layerData.url + this.owmKey, {
             opacity: 0.7,
             attribution: "&copy; <a href='https://openweathermap.org/'>OpenWeatherMap</a>",
         });
+        if (this.properties.legend && this.properties.legendElement) {
+            (0, make_lengnd_1.makeLegend)(this.properties.legendElement, layerData);
+        }
         tileLayer.addTo(this.map);
         this.activeTileLayer = tileLayer;
         this.activeKey = key;

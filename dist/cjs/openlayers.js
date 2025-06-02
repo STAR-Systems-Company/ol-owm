@@ -15,6 +15,7 @@ const interaction_1 = require("ol/interaction");
 const get_svg_image_1 = require("./hoocks/get.svg.image");
 const layers_1 = require("./layers");
 const source_1 = require("ol/source");
+const make_lengnd_1 = require("./hoocks/make.lengnd");
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
     const y = Math.floor(((1 -
@@ -33,6 +34,8 @@ function formatUnixTime(timestamp, timezoneOffset) {
 }
 const defaultProperties = {
     lang: "en",
+    legend: true,
+    legendElement: "#map",
 };
 class OpenLayersWeather {
     constructor(map, owmKey, properties = defaultProperties) {
@@ -114,15 +117,16 @@ class OpenLayersWeather {
     setLayer(key) {
         if (key === this.activeKey)
             return;
-        // Удалить текущий слой
         if (this.tileLayer) {
+            (0, make_lengnd_1.removeLegend)(this.properties.legendElement);
             this.map.removeLayer(this.tileLayer);
             this.tileLayer = null;
             this.activeKey = null;
         }
-        // Если ключ null — только удалить
-        if (!key)
+        if (!key) {
+            (0, make_lengnd_1.removeLegend)(this.properties.legendElement);
             return;
+        }
         const layerData = layers_1.layers.find((l) => l.key === key);
         if (!layerData)
             return;
@@ -133,6 +137,9 @@ class OpenLayersWeather {
             source,
             zIndex: 50,
         });
+        if (this.properties.legend && this.properties.legendElement) {
+            (0, make_lengnd_1.makeLegend)(this.properties.legendElement, layerData);
+        }
         this.map.addLayer(tileLayer);
         this.tileLayer = tileLayer;
         this.activeKey = key;

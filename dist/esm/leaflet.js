@@ -2,8 +2,10 @@
 import L from "leaflet";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
+import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
 const defaultProperties = {
     lang: "en",
+    legend: true,
 };
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -47,24 +49,32 @@ export class LeafletWeather {
         });
     }
     setLayer(key) {
+        if (key === this.activeKey)
+            return;
         // Удаляем текущий слой, если он есть
         if (this.activeTileLayer) {
+            removeLegend(this.properties.legendElement);
             this.map.removeLayer(this.activeTileLayer);
             this.activeTileLayer = null;
             this.activeKey = null;
         }
         // Если key не передан, просто выходим
-        if (!key)
+        if (!key) {
+            removeLegend(this.properties.legendElement);
             return;
-        const layer = layers.find((x) => x.key === key);
-        if (!layer) {
+        }
+        const layerData = layers.find((x) => x.key === key);
+        if (!layerData) {
             console.warn("Layer not found for key:", key);
             return;
         }
-        const tileLayer = L.tileLayer(layer.url + this.owmKey, {
+        const tileLayer = L.tileLayer(layerData.url + this.owmKey, {
             opacity: 0.7,
             attribution: "&copy; <a href='https://openweathermap.org/'>OpenWeatherMap</a>",
         });
+        if (this.properties.legend && this.properties.legendElement) {
+            makeLegend(this.properties.legendElement, layerData);
+        }
         tileLayer.addTo(this.map);
         this.activeTileLayer = tileLayer;
         this.activeKey = key;

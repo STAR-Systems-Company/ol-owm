@@ -19,7 +19,12 @@ const mapOL = new Map({
 const weatherOL = new OpenLayersWeather(
   mapOL,
   "b1b15e88fa797225412429c1c50c122a1",
-  { lang: "ru", legend: true, legendElement: "#map-ol" }
+  {
+    lang: "ru",
+    legend: true,
+    legendElement: "#map-ol",
+    windDataURL: "https://blog.sakitam.com/wind-layer/data/wind.json",
+  }
 );
 
 weatherOL.show();

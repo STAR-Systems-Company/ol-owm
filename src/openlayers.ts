@@ -13,6 +13,7 @@ import { layers } from "./layers";
 import { LayerType } from "./interface/layer.interface";
 import { XYZ } from "ol/source";
 import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
+import { WindAnimation } from "./layers/wind";
 
 function lonLatToTile(lon: number, lat: number, zoom: number) {
   const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
@@ -40,6 +41,7 @@ const defaultProperties: Properties = {
   lang: "en",
   legend: true,
   legendElement: "#map",
+  windDataURL: null,
 };
 
 export class OpenLayersWeather {
@@ -51,7 +53,7 @@ export class OpenLayersWeather {
   private doubleClickZoom?: DoubleClickZoom;
   private layer?: VectorLayer;
   private onMoveEnd: () => void;
-
+  private wind: WindAnimation;
   private tileLayer: TileLayer | null = null;
   public activeKey: string | null = null;
 
@@ -63,7 +65,7 @@ export class OpenLayersWeather {
     this.map = map;
     this.owmKey = owmKey;
     this.properties = properties;
-
+    this.wind = new WindAnimation(map);
     this.onMoveEnd = () => {
       this.update();
     };
@@ -148,10 +150,18 @@ export class OpenLayersWeather {
     this.map.on("dblclick", this.onMapDoubleClick);
     this.map.on("click", this.onMapClick);
 
+    if (this.properties.windDataURL)
+      fetch(this.properties.windDataURL)
+        .then((r) => r.json())
+        .then((data) => {
+          this.wind.start(data);
+        });
+
     await this.update();
   }
 
   hide() {
+    this.wind.stop();
     this.map.un("dblclick", this.onMapDoubleClick);
     this.map.un("click", this.onMapClick);
 

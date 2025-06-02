@@ -33,7 +33,7 @@ const makeLegend = (prefix, id, layerData) => {
         .forEach((el) => el.remove());
     const legendBox = document.createElement("div");
     legendBox.id = "ol-wms-legend-box" + prefix;
-    legendBox.style.cssText = `width: 100%; height: 16px; position: relative; background: ${_STYLES[layerData.key]};`;
+    legendBox.style.cssText = `z-index:10; width: 100%; height: 16px; position: relative; background: ${_STYLES[layerData.key]};`;
     const popup = document.createElement("div");
     popup.style.cssText = `position:absolute;top:-30px;background:rgba(0,0,0,0.7);color:#fff;font-size:12px;padding:2px 6px;border-radius:4px;pointer-events:none;white-space:nowrap;display:none;`;
     legendBox.appendChild(popup);

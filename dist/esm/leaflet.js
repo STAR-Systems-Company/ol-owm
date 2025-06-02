@@ -53,16 +53,14 @@ export class LeafletWeather {
             return;
         // Удаляем текущий слой, если он есть
         if (this.activeTileLayer) {
-            removeLegend(this.properties.legendElement);
+            removeLegend("-l");
             this.map.removeLayer(this.activeTileLayer);
             this.activeTileLayer = null;
             this.activeKey = null;
         }
         // Если key не передан, просто выходим
-        if (!key) {
-            removeLegend(this.properties.legendElement);
+        if (!key)
             return;
-        }
         const layerData = layers.find((x) => x.key === key);
         if (!layerData) {
             console.warn("Layer not found for key:", key);
@@ -72,9 +70,11 @@ export class LeafletWeather {
             opacity: 0.7,
             attribution: "&copy; <a href='https://openweathermap.org/'>OpenWeatherMap</a>",
         });
-        if (this.properties.legend && this.properties.legendElement) {
-            makeLegend(this.properties.legendElement, layerData);
-        }
+        setTimeout(() => {
+            if (this.properties.legend && this.properties.legendElement) {
+                makeLegend("-l", this.properties.legendElement, layerData);
+            }
+        }, 0);
         tileLayer.addTo(this.map);
         this.activeTileLayer = tileLayer;
         this.activeKey = key;

@@ -86,16 +86,13 @@ export class OpenLayersWeather {
     if (key === this.activeKey) return;
 
     if (this.tileLayer) {
-      removeLegend(this.properties.legendElement);
+      removeLegend("-ol");
       this.map.removeLayer(this.tileLayer);
       this.tileLayer = null;
       this.activeKey = null;
     }
 
-    if (!key) {
-      removeLegend(this.properties.legendElement);
-      return;
-    }
+    if (!key) return;
 
     const layerData = layers.find((l) => l.key === key);
     if (!layerData) return;
@@ -109,13 +106,14 @@ export class OpenLayersWeather {
       zIndex: 50,
     });
 
-    if (this.properties.legend && this.properties.legendElement) {
-      makeLegend(this.properties.legendElement, layerData);
-    }
-
     this.map.addLayer(tileLayer);
     this.tileLayer = tileLayer;
     this.activeKey = key;
+
+    // Добавляем легенду заново
+    if (this.properties.legend && this.properties.legendElement) {
+      makeLegend("-ol", this.properties.legendElement, layerData);
+    }
   }
 
   async show() {

@@ -118,15 +118,13 @@ class OpenLayersWeather {
         if (key === this.activeKey)
             return;
         if (this.tileLayer) {
-            (0, make_lengnd_1.removeLegend)(this.properties.legendElement);
+            (0, make_lengnd_1.removeLegend)("-ol");
             this.map.removeLayer(this.tileLayer);
             this.tileLayer = null;
             this.activeKey = null;
         }
-        if (!key) {
-            (0, make_lengnd_1.removeLegend)(this.properties.legendElement);
+        if (!key)
             return;
-        }
         const layerData = layers_1.layers.find((l) => l.key === key);
         if (!layerData)
             return;
@@ -137,12 +135,13 @@ class OpenLayersWeather {
             source,
             zIndex: 50,
         });
-        if (this.properties.legend && this.properties.legendElement) {
-            (0, make_lengnd_1.makeLegend)(this.properties.legendElement, layerData);
-        }
         this.map.addLayer(tileLayer);
         this.tileLayer = tileLayer;
         this.activeKey = key;
+        // Добавляем легенду заново
+        if (this.properties.legend && this.properties.legendElement) {
+            (0, make_lengnd_1.makeLegend)("-ol", this.properties.legendElement, layerData);
+        }
     }
     async show() {
         this.doubleClickZoom = this.map

@@ -1,6 +1,6 @@
 {
   "name": "ol-owm",
-  "version": "2.2.0",
+  "version": "2.2.2",
   "description": "Weather layer for OpenLayers and Leaflet using OpenWeatherMap",
   "type": "module",
   "types": "./dist/esm/index.d.ts",

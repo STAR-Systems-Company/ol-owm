@@ -39,7 +39,7 @@ export const makeLegend = (
 
   const legendBox = document.createElement("div");
   legendBox.id = "ol-wms-legend-box" + prefix;
-  legendBox.style.cssText = `width: 100%; height: 16px; position: relative; background: ${
+  legendBox.style.cssText = `z-index:10; width: 100%; height: 16px; position: relative; background: ${
     _STYLES[layerData.key]
   };`;
 

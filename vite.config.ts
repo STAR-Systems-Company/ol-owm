@@ -1,10 +1,10 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/ol-owm/", // 👈 обязательно
-  root: "demo", // если ты билдишь из /demo
+  base: "/ol-owm/docs", // 👈 ОБЯЗАТЕЛЬНО для GitHub Pages
+  root: "demo", // 👈 если твои html+ts лежат в /demo
   build: {
-    outDir: "../docs", // чтобы Pages читал из docs/
+    outDir: "../docs", // 👈 выгрузка в /docs
     emptyOutDir: true,
   },
 });

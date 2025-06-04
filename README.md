@@ -2,6 +2,9 @@
 
 **OL-OWM** is a TypeScript library for displaying weather data on **[OpenLayers](https://openlayers.org/)** and **[Leaflet](https://leafletjs.com/)** maps using the **[OpenWeatherMap](https://openweathermap.org/)** API.
 
+## Example
+**[Open example](https://star-systems-company.github.io/ol-owm/docs/)**
+
 ---
 
 ## 📦 Installation

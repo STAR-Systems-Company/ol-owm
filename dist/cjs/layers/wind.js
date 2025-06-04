@@ -15,7 +15,7 @@ class WindAnimation {
     start(data) {
         var _a, _b;
         if (this.layer)
-            return;
+            return true;
         this.layer = (0, WindLayerFactory_1.createWindLayer)(this.map.type, data, {
             windOptions: {
                 // velocityScale,
@@ -42,6 +42,7 @@ class WindAnimation {
                 });
             }
         });
+        return true;
     }
     stop() {
         if (this.layer) {
@@ -52,6 +53,7 @@ class WindAnimation {
             this.map.offZoomChange(this.zoomListenerKey);
             this.zoomListenerKey = null;
         }
+        return false;
     }
 }
 exports.WindAnimation = WindAnimation;

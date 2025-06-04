@@ -34,6 +34,7 @@ class LeafletWeather {
     constructor(map, owmKey, properties = defaultProperties) {
         this.activeTileLayer = null;
         this.activeKey = null;
+        this.activeWind = false;
         this.update = async () => {
             const zoom = Math.floor(this.map.getZoom());
             const bounds = this.map.getBounds();
@@ -201,11 +202,11 @@ class LeafletWeather {
                 fetch(this.properties.windDataURL)
                     .then((r) => r.json())
                     .then((data) => {
-                    this.wind.start(data);
+                    this.activeWind = this.wind.start(data);
                 });
             }
             else {
-                this.wind.stop();
+                this.activeWind = this.wind.stop();
             }
         }
     }

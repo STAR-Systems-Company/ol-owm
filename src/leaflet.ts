@@ -41,8 +41,9 @@ export class LeafletWeather {
   private layerGroup?: L.LayerGroup;
   private popup: L.Popup;
   private activeTileLayer: TileLayer | null = null;
-  public activeKey: string | null = null;
   private wind: WindAnimation;
+  public activeKey: string | null = null;
+  public activeWind: boolean = false;
 
   constructor(
     map: LeafletMap,
@@ -108,17 +109,16 @@ export class LeafletWeather {
     this.activeTileLayer = tileLayer;
     this.activeKey = key;
   }
-
   toggleWind() {
     if (this.properties.windDataURL) {
       if (!this.wind.getActive()) {
         fetch(this.properties.windDataURL)
           .then((r) => r.json())
           .then((data) => {
-            this.wind.start(data);
+            this.activeWind = this.wind.start(data);
           });
       } else {
-        this.wind.stop();
+        this.activeWind = this.wind.stop();
       }
     }
   }

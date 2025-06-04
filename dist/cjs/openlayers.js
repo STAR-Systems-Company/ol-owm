@@ -44,6 +44,7 @@ class OpenLayersWeather {
     constructor(map, owmKey, properties = defaultProperties) {
         this.tileLayer = null;
         this.activeKey = null;
+        this.activeWind = false;
         this.onMapClick = () => {
             if (this.popupOverlay) {
                 this.popupOverlay.setPosition(undefined);
@@ -153,11 +154,11 @@ class OpenLayersWeather {
                 fetch(this.properties.windDataURL)
                     .then((r) => r.json())
                     .then((data) => {
-                    this.wind.start(data);
+                    this.activeWind = this.wind.start(data);
                 });
             }
             else {
-                this.wind.stop();
+                this.activeWind = this.wind.stop();
             }
         }
     }

@@ -1,26 +1,25 @@
 import { createWindLayer } from "./WindLayerFactory";
 export class WindAnimation {
-    map;
-    properties;
-    layer = null;
-    zoomListenerKey = null;
     constructor(map, properties) {
         this.map = map;
         this.properties = properties;
+        this.layer = null;
+        this.zoomListenerKey = null;
     }
     getActive() {
         return !!this.layer;
     }
     start(data) {
+        var _a, _b;
         if (this.layer)
-            return;
+            return true;
         this.layer = createWindLayer(this.map.type, data, {
             windOptions: {
                 // velocityScale,
                 // paths: 5000,
                 velocityScale: 0.03,
-                projection: this.properties?.projection || "EPSG:4326",
-                colorScale: [this.properties?.color || "rgb(36,104, 180)"],
+                projection: ((_a = this.properties) === null || _a === void 0 ? void 0 : _a.projection) || "EPSG:4326",
+                colorScale: [((_b = this.properties) === null || _b === void 0 ? void 0 : _b.color) || "rgb(36,104, 180)"],
                 lineWidth: 1,
                 generateParticleOption: true,
                 fadeOpacity: 0.95,
@@ -40,6 +39,7 @@ export class WindAnimation {
                 });
             }
         });
+        return true;
     }
     stop() {
         if (this.layer) {
@@ -50,5 +50,6 @@ export class WindAnimation {
             this.map.offZoomChange(this.zoomListenerKey);
             this.zoomListenerKey = null;
         }
+        return false;
     }
 }

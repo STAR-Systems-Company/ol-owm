@@ -57,6 +57,7 @@ export class OpenLayersWeather {
   private wind: WindAnimation;
   private tileLayer: TileLayer | null = null;
   public activeKey: string | null = null;
+  public activeWind: boolean = false;
 
   constructor(
     map: OLMap,
@@ -128,10 +129,10 @@ export class OpenLayersWeather {
         fetch(this.properties.windDataURL)
           .then((r) => r.json())
           .then((data) => {
-            this.wind.start(data);
+            this.activeWind = this.wind.start(data);
           });
       } else {
-        this.wind.stop();
+        this.activeWind = this.wind.stop();
       }
     }
   }

@@ -4,7 +4,7 @@ import TileLayer from "ol/layer/Tile";
 import OSM from "ol/source/OSM";
 import { fromLonLat } from "ol/proj";
 import L from "leaflet";
-import { OpenLayersWeather, LeafletWeather } from "../src";
+import { OpenLayersWeather, LeafletWeather } from "../dist/esm";
 import { layers } from "../src/layers";
 
 const mapOL = new Map({
@@ -29,6 +29,8 @@ const weatherOL = new OpenLayersWeather(
     },
   }
 );
+
+// weatherOL
 
 weatherOL.show();
 

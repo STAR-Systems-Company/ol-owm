@@ -15,8 +15,8 @@ export class WindAnimation {
   public getActive(): boolean {
     return !!this.layer;
   }
-  public start(data: any): void {
-    if (this.layer) return;
+  public start(data: any): boolean {
+    if (this.layer) return true;
     this.layer = createWindLayer(this.map.type, data, {
       windOptions: {
         // velocityScale,
@@ -48,9 +48,11 @@ export class WindAnimation {
         });
       }
     });
+
+    return true;
   }
 
-  public stop(): void {
+  public stop(): boolean {
     if (this.layer) {
       this.map.removeLayer(this.layer);
       this.layer = null;
@@ -60,5 +62,7 @@ export class WindAnimation {
       this.map.offZoomChange(this.zoomListenerKey);
       this.zoomListenerKey = null;
     }
+
+    return false;
   }
 }

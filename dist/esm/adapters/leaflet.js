@@ -1,8 +1,7 @@
 export class LeafletAdapter {
-    map;
-    type = "leaflet"; // 👈 добавляем поле type
     constructor(map) {
         this.map = map;
+        this.type = "leaflet"; // 👈 добавляем поле type
     }
     getZoom() {
         return this.map.getZoom();

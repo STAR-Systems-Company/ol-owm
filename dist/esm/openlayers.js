@@ -35,18 +35,65 @@ const defaultProperties = {
     windDataURL: null,
 };
 export class OpenLayersWeather {
-    map;
-    owmKey;
-    properties;
-    popupElement;
-    popupOverlay;
-    doubleClickZoom;
-    layer;
-    onMoveEnd;
-    wind;
-    tileLayer = null;
-    activeKey = null;
     constructor(map, owmKey, properties = defaultProperties) {
+        this.tileLayer = null;
+        this.activeKey = null;
+        this.activeWind = false;
+        this.onMapClick = () => {
+            if (this.popupOverlay) {
+                this.popupOverlay.setPosition(undefined);
+            }
+        };
+        this.onMapDoubleClick = async (evt) => {
+            const coord = toLonLat(evt.coordinate);
+            const [lon, lat] = coord;
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=${this.properties.lang}&appid=${this.owmKey}`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                const { name, weather, main, wind, sys, timezone, clouds, visibility } = data;
+                const weatherData = weather[0];
+                const description = weatherData.description;
+                const mainCondition = weatherData.main;
+                const sunrise = formatUnixTime(sys.sunrise, timezone);
+                const sunset = formatUnixTime(sys.sunset, timezone);
+                this.popupElement.innerHTML = `
+  <div style="font-family: 'Segoe UI', sans-serif; color: #1a1a1a; min-width: 240px;">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+      <img src="https://openweathermap.org/img/wn/${weather === null || weather === void 0 ? void 0 : weather[0].icon}@2x.png" alt="${mainCondition}" width="48" height="48" style=" object-position: center;
+    object-fit: cover;
+    width: 48px;
+    height: 48px;
+    background: #404040;
+    border-radius: 10px;
+    " />
+      <div>
+        <div style="font-size: 16px; font-weight: 600;">${name || "Unknown"}, ${sys.country}</div>
+        <div style="font-size: 13px; color: #666;">${description}</div>
+      </div>
+    </div>
+
+    <div style="font-size: 14px; line-height: 1.7;">
+      🌡️ <b>Temperature:</b> ${main.temp.toFixed(1)}°C<br />
+      🤒 <b>Feels like:</b> ${main.feels_like.toFixed(1)}°C<br />
+      📈 <b>Max/Min:</b> ${main.temp_max.toFixed(1)}°C / ${main.temp_min.toFixed(1)}°C<br />
+      💧 <b>Humidity:</b> ${main.humidity}%<br />
+      🧭 <b>Pressure:</b> ${main.pressure} hPa<br />
+      ☁️ <b>Cloudiness:</b> ${clouds.all}%<br />
+      👁 <b>Visibility:</b> ${(visibility / 1000).toFixed(1)} km<br />
+      🌬️ <b>Wind:</b> ${wind.speed.toFixed(1)} m/s ${wind.gust ? `(gusts up to ${wind.gust.toFixed(1)} m/s)` : ""}<br />
+      ↗ <b>Direction:</b> ${wind.deg}°<br />
+      🌅 <b>Sunrise:</b> ${sunrise}<br />
+      🌇 <b>Sunset:</b> ${sunset}
+    </div>
+  </div>
+`;
+                this.popupOverlay.setPosition(evt.coordinate);
+            }
+            catch (e) {
+                console.warn("Ошибка запроса погоды:", e);
+            }
+        };
         this.map = map;
         this.owmKey = owmKey;
         this.properties = properties;
@@ -101,11 +148,11 @@ export class OpenLayersWeather {
                 fetch(this.properties.windDataURL)
                     .then((r) => r.json())
                     .then((data) => {
-                    this.wind.start(data);
+                    this.activeWind = this.wind.start(data);
                 });
             }
             else {
-                this.wind.stop();
+                this.activeWind = this.wind.stop();
             }
         }
     }
@@ -153,8 +200,9 @@ export class OpenLayersWeather {
         }
     }
     async update() {
+        var _a;
         const view = this.map.getView();
-        const zoom = Math.floor(view.getZoom() ?? 6);
+        const zoom = Math.floor((_a = view.getZoom()) !== null && _a !== void 0 ? _a : 6);
         const extent = view.calculateExtent(this.map.getSize());
         const topLeft = toLonLat([extent[0], extent[3]]);
         const bottomRight = toLonLat([extent[2], extent[1]]);
@@ -252,59 +300,4 @@ export class OpenLayersWeather {
             this.layer.setSource(source);
         }
     }
-    onMapClick = () => {
-        if (this.popupOverlay) {
-            this.popupOverlay.setPosition(undefined);
-        }
-    };
-    onMapDoubleClick = async (evt) => {
-        const coord = toLonLat(evt.coordinate);
-        const [lon, lat] = coord;
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=${this.properties.lang}&appid=${this.owmKey}`;
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            const { name, weather, main, wind, sys, timezone, clouds, visibility } = data;
-            const weatherData = weather[0];
-            const description = weatherData.description;
-            const mainCondition = weatherData.main;
-            const sunrise = formatUnixTime(sys.sunrise, timezone);
-            const sunset = formatUnixTime(sys.sunset, timezone);
-            this.popupElement.innerHTML = `
-  <div style="font-family: 'Segoe UI', sans-serif; color: #1a1a1a; min-width: 240px;">
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-      <img src="https://openweathermap.org/img/wn/${weather?.[0].icon}@2x.png" alt="${mainCondition}" width="48" height="48" style=" object-position: center;
-    object-fit: cover;
-    width: 48px;
-    height: 48px;
-    background: #404040;
-    border-radius: 10px;
-    " />
-      <div>
-        <div style="font-size: 16px; font-weight: 600;">${name || "Unknown"}, ${sys.country}</div>
-        <div style="font-size: 13px; color: #666;">${description}</div>
-      </div>
-    </div>
-
-    <div style="font-size: 14px; line-height: 1.7;">
-      🌡️ <b>Temperature:</b> ${main.temp.toFixed(1)}°C<br />
-      🤒 <b>Feels like:</b> ${main.feels_like.toFixed(1)}°C<br />
-      📈 <b>Max/Min:</b> ${main.temp_max.toFixed(1)}°C / ${main.temp_min.toFixed(1)}°C<br />
-      💧 <b>Humidity:</b> ${main.humidity}%<br />
-      🧭 <b>Pressure:</b> ${main.pressure} hPa<br />
-      ☁️ <b>Cloudiness:</b> ${clouds.all}%<br />
-      👁 <b>Visibility:</b> ${(visibility / 1000).toFixed(1)} km<br />
-      🌬️ <b>Wind:</b> ${wind.speed.toFixed(1)} m/s ${wind.gust ? `(gusts up to ${wind.gust.toFixed(1)} m/s)` : ""}<br />
-      ↗ <b>Direction:</b> ${wind.deg}°<br />
-      🌅 <b>Sunrise:</b> ${sunrise}<br />
-      🌇 <b>Sunset:</b> ${sunset}
-    </div>
-  </div>
-`;
-            this.popupOverlay.setPosition(evt.coordinate);
-        }
-        catch (e) {
-            console.warn("Ошибка запроса погоды:", e);
-        }
-    };
 }

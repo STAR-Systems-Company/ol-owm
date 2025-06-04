@@ -1,8 +1,7 @@
 export class OpenLayersAdapter {
-    map;
-    type = "openlayers"; // 👈 добавляем поле type
     constructor(map) {
         this.map = map;
+        this.type = "openlayers"; // 👈 добавляем поле type
     }
     getZoom() {
         return this.map.getView().getZoom();

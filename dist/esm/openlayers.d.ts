@@ -12,6 +12,7 @@ export declare class OpenLayersWeather {
     private wind;
     private tileLayer;
     activeKey: string | null;
+    activeWind: boolean;
     constructor(map: OLMap, owmKey: string, properties?: Properties);
     status(): boolean;
     layers(): {

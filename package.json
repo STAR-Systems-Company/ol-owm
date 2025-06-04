@@ -1,6 +1,6 @@
 {
   "name": "ol-owm",
-  "version": "2.2.4",
+  "version": "3.0.2",
   "description": "Weather layer for OpenLayers and Leaflet using OpenWeatherMap",
   "type": "module",
   "types": "./dist/esm/index.d.ts",
@@ -11,7 +11,8 @@
     "require": "./dist/cjs/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json",
+    "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && npm run copy-libs",
+    "copy-libs": "cpx \"src/libs/**/*\" dist/esm/libs && cpx \"src/libs/**/*\" dist/cjs/libs",
     "prepare": "npm run build",
     "dev": "vite"
   },
@@ -33,12 +34,11 @@
   "license": "MIT",
   "dependencies": {
     "leaflet": "^1.9.4",
-    "leaflet-wind": "^1.2.2",
-    "ol": "^10.4.0",
-    "ol-wind": "^1.1.9"
+    "ol": "^10.4.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.18",
+    "cpx": "^1.5.0",
     "typescript": "^5.3.3",
     "vite": "^6.3.5"
   }

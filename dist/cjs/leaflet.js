@@ -4,11 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LeafletWeather = void 0;
-// LeafletWeather.ts
 const leaflet_1 = __importDefault(require("leaflet"));
 const get_svg_image_1 = require("./hoocks/get.svg.image");
 const layers_1 = require("./layers");
 const make_lengnd_1 = require("./hoocks/make.lengnd");
+const wind_1 = require("./layers/wind");
+const leaflet_2 = require("./adapters/leaflet");
 const defaultProperties = {
     lang: "en",
     legend: true,
@@ -150,6 +151,7 @@ class LeafletWeather {
         this.owmKey = owmKey;
         this.properties = properties;
         this.popup = leaflet_1.default.popup();
+        this.wind = new wind_1.WindAnimation(new leaflet_2.LeafletAdapter(map), properties.windProperties);
     }
     status() {
         return !!this.layerGroup;
@@ -192,6 +194,20 @@ class LeafletWeather {
         tileLayer.addTo(this.map);
         this.activeTileLayer = tileLayer;
         this.activeKey = key;
+    }
+    toggleWind() {
+        if (this.properties.windDataURL) {
+            if (!this.wind.getActive()) {
+                fetch(this.properties.windDataURL)
+                    .then((r) => r.json())
+                    .then((data) => {
+                    this.wind.start(data);
+                });
+            }
+            else {
+                this.wind.stop();
+            }
+        }
     }
     async show() {
         this.map.doubleClickZoom.disable();

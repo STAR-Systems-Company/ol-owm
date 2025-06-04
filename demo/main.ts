@@ -23,7 +23,10 @@ const weatherOL = new OpenLayersWeather(
     lang: "ru",
     legend: true,
     legendElement: "#map-ol",
-    windDataURL: "https://blog.sakitam.com/wind-layer/data/wind.json",
+    windDataURL: "http://localhost:6548/weather/wind.min.json",
+    windProperties: {
+      color: "red",
+    },
   }
 );
 
@@ -39,7 +42,15 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const weatherLeaflet = new LeafletWeather(
   mapLeaflet,
   "b1b15e88fa797225412429c1c50c122a1",
-  { lang: "ru", legend: true, legendElement: "#map-leaflet" }
+  {
+    lang: "ru",
+    legend: true,
+    legendElement: "#map-leaflet",
+    windDataURL: "http://localhost:6548/weather/wind.min.json",
+    windProperties: {
+      color: "blue",
+    },
+  }
 );
 weatherLeaflet.show();
 
@@ -63,4 +74,13 @@ if (controls) {
     weatherLeaflet.setLayer(null);
   };
   controls.appendChild(btn);
+}
+
+const toggleWindBtn = document.querySelector("#toggle-wind");
+
+if (toggleWindBtn) {
+  toggleWindBtn.addEventListener("click", () => {
+    weatherOL.toggleWind();
+    weatherLeaflet.toggleWind();
+  });
 }

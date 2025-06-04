@@ -1,8 +1,9 @@
-// LeafletWeather.ts
 import L from "leaflet";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
 import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
+import { WindAnimation } from "./layers/wind";
+import { LeafletAdapter } from "./adapters/leaflet";
 const defaultProperties = {
     lang: "en",
     legend: true,
@@ -31,11 +32,13 @@ export class LeafletWeather {
     popup;
     activeTileLayer = null;
     activeKey = null;
+    wind;
     constructor(map, owmKey, properties = defaultProperties) {
         this.map = map;
         this.owmKey = owmKey;
         this.properties = properties;
         this.popup = L.popup();
+        this.wind = new WindAnimation(new LeafletAdapter(map), properties.windProperties);
     }
     status() {
         return !!this.layerGroup;
@@ -78,6 +81,20 @@ export class LeafletWeather {
         tileLayer.addTo(this.map);
         this.activeTileLayer = tileLayer;
         this.activeKey = key;
+    }
+    toggleWind() {
+        if (this.properties.windDataURL) {
+            if (!this.wind.getActive()) {
+                fetch(this.properties.windDataURL)
+                    .then((r) => r.json())
+                    .then((data) => {
+                    this.wind.start(data);
+                });
+            }
+            else {
+                this.wind.stop();
+            }
+        }
     }
     async show() {
         this.map.doubleClickZoom.disable();

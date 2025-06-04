@@ -8,6 +8,7 @@ export declare class LeafletWeather {
     private popup;
     private activeTileLayer;
     activeKey: string | null;
+    private wind;
     constructor(map: LeafletMap, owmKey: string, properties?: Properties);
     status(): boolean;
     layers(): {
@@ -15,6 +16,7 @@ export declare class LeafletWeather {
         key: string;
     }[];
     setLayer(key: string | null): void;
+    toggleWind(): void;
     show(): Promise<void>;
     hide(): void;
     private update;

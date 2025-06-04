@@ -1,10 +1,11 @@
-// LeafletWeather.ts
 import L, { Map as LeafletMap, TileLayer } from "leaflet";
 import { Properties } from "./interface/properties.interface";
 import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
 import { LayerType } from "./interface/layer.interface";
 import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
+import { WindAnimation } from "./layers/wind";
+import { LeafletAdapter } from "./adapters/leaflet";
 
 const defaultProperties: Properties = {
   lang: "en",
@@ -41,6 +42,7 @@ export class LeafletWeather {
   private popup: L.Popup;
   private activeTileLayer: TileLayer | null = null;
   public activeKey: string | null = null;
+  private wind: WindAnimation;
 
   constructor(
     map: LeafletMap,
@@ -51,6 +53,10 @@ export class LeafletWeather {
     this.owmKey = owmKey;
     this.properties = properties;
     this.popup = L.popup();
+    this.wind = new WindAnimation(
+      new LeafletAdapter(map),
+      properties.windProperties
+    );
   }
 
   status() {
@@ -103,6 +109,20 @@ export class LeafletWeather {
     this.activeKey = key;
   }
 
+  toggleWind() {
+    if (this.properties.windDataURL) {
+      if (!this.wind.getActive()) {
+        fetch(this.properties.windDataURL)
+          .then((r) => r.json())
+          .then((data) => {
+            this.wind.start(data);
+          });
+      } else {
+        this.wind.stop();
+      }
+    }
+  }
+
   async show() {
     this.map.doubleClickZoom.disable();
     this.map.on("moveend", this.update);
@@ -110,6 +130,7 @@ export class LeafletWeather {
     this.map.on("click", () => {
       this.map.closePopup();
     });
+
     await this.update();
   }
 

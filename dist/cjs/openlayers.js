@@ -16,6 +16,8 @@ const get_svg_image_1 = require("./hoocks/get.svg.image");
 const layers_1 = require("./layers");
 const source_1 = require("ol/source");
 const make_lengnd_1 = require("./hoocks/make.lengnd");
+const wind_1 = require("./layers/wind");
+const ol_1 = require("./adapters/ol");
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
     const y = Math.floor(((1 -
@@ -36,6 +38,7 @@ const defaultProperties = {
     lang: "en",
     legend: true,
     legendElement: "#map",
+    windDataURL: null,
 };
 class OpenLayersWeather {
     constructor(map, owmKey, properties = defaultProperties) {
@@ -99,6 +102,7 @@ class OpenLayersWeather {
         this.map = map;
         this.owmKey = owmKey;
         this.properties = properties;
+        this.wind = new wind_1.WindAnimation(new ol_1.OpenLayersAdapter(map), properties.windProperties);
         this.onMoveEnd = () => {
             this.update();
         };
@@ -141,6 +145,20 @@ class OpenLayersWeather {
         // Добавляем легенду заново
         if (this.properties.legend && this.properties.legendElement) {
             (0, make_lengnd_1.makeLegend)("-ol", this.properties.legendElement, layerData);
+        }
+    }
+    toggleWind() {
+        if (this.properties.windDataURL) {
+            if (!this.wind.getActive()) {
+                fetch(this.properties.windDataURL)
+                    .then((r) => r.json())
+                    .then((data) => {
+                    this.wind.start(data);
+                });
+            }
+            else {
+                this.wind.stop();
+            }
         }
     }
     async show() {

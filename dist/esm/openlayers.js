@@ -10,6 +10,8 @@ import { getSvgImage } from "./hoocks/get.svg.image";
 import { layers } from "./layers";
 import { XYZ } from "ol/source";
 import { makeLegend, removeLegend } from "./hoocks/make.lengnd";
+import { WindAnimation } from "./layers/wind";
+import { OpenLayersAdapter } from "./adapters/ol";
 function lonLatToTile(lon, lat, zoom) {
     const x = Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
     const y = Math.floor(((1 -
@@ -30,6 +32,7 @@ const defaultProperties = {
     lang: "en",
     legend: true,
     legendElement: "#map",
+    windDataURL: null,
 };
 export class OpenLayersWeather {
     map;
@@ -40,12 +43,14 @@ export class OpenLayersWeather {
     doubleClickZoom;
     layer;
     onMoveEnd;
+    wind;
     tileLayer = null;
     activeKey = null;
     constructor(map, owmKey, properties = defaultProperties) {
         this.map = map;
         this.owmKey = owmKey;
         this.properties = properties;
+        this.wind = new WindAnimation(new OpenLayersAdapter(map), properties.windProperties);
         this.onMoveEnd = () => {
             this.update();
         };
@@ -88,6 +93,20 @@ export class OpenLayersWeather {
         // Добавляем легенду заново
         if (this.properties.legend && this.properties.legendElement) {
             makeLegend("-ol", this.properties.legendElement, layerData);
+        }
+    }
+    toggleWind() {
+        if (this.properties.windDataURL) {
+            if (!this.wind.getActive()) {
+                fetch(this.properties.windDataURL)
+                    .then((r) => r.json())
+                    .then((data) => {
+                    this.wind.start(data);
+                });
+            }
+            else {
+                this.wind.stop();
+            }
         }
     }
     async show() {

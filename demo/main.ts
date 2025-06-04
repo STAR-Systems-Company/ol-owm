@@ -22,7 +22,7 @@ const weatherOL = new OpenLayersWeather(
     lang: "ru",
     legend: true,
     legendElement: "#map-ol",
-    windDataURL: "http://localhost:6548/weather/wind.min.json",
+    windDataURL: "https://ad.micro-gis.com/weather/wind.min.json",
     windProperties: {
       color: "red",
     },
@@ -47,7 +47,7 @@ const weatherLeaflet = new LeafletWeather(
     lang: "ru",
     legend: true,
     legendElement: "#map-leaflet",
-    windDataURL: "http://localhost:6548/weather/wind.min.json",
+    windDataURL: "https://ad.micro-gis.com/weather/wind.min.json",
     windProperties: {
       color: "blue",
     },

@@ -3,7 +3,7 @@ export { Field } from 'wind-core';
 import { BaseLayer as BaseLayer$1, LayerSourceType, TileID, polygon2buffer } from 'wind-gl-core';
 export { DecodeType, ImageSource, LayerSourceType, MaskType, RenderFrom, RenderType, TileID, TileSource, TimelineSource, configDeps } from 'wind-gl-core';
 import * as L from 'leaflet';
-import rewind from '@mapbox/geojson-rewind';
+// import rewind from '@mapbox/geojson-rewind';
 import { utils, highPrecision, Matrix4, OrthographicCamera, PerspectiveCamera, Vector3, ProjectionMatrix, Renderer, Scene } from '@sakitam-gis/vis-engine';
 import { mat4 } from 'gl-matrix';
 
@@ -924,7 +924,7 @@ class WebglLayer extends BaseLayer {
     if (this.options.mask) {
       const mask = this.options.mask;
       const data = mask.data;
-      rewind(data, true);
+      // rewind(data, true);
       const tr = (coords) => {
         const mercatorCoordinates = [];
         for (let i2 = 0; i2 < coords.length; i2++) {

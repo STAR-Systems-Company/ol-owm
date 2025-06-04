@@ -1,0 +1,6 @@
+{
+  "name": "ol-wind",
+  "main": "./ol-wind.cjs.js",
+  "module": "./ol-wind.esm.js",
+  "types": "./index.d.ts"
+}

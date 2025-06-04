@@ -1,0 +1,6 @@
+{
+  "name": "leaflet-wind",
+  "main": "./leaflet-wind.cjs.js",
+  "module": "./leaflet-wind.esm.js",
+  "types": "./index.d.ts"
+}

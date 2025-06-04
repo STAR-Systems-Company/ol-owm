@@ -5,7 +5,6 @@ import OSM from "ol/source/OSM";
 import { fromLonLat } from "ol/proj";
 import L from "leaflet";
 import { OpenLayersWeather, LeafletWeather } from "../dist/esm";
-import { layers } from "../src/layers";
 
 const mapOL = new Map({
   target: "map-ol",
@@ -59,7 +58,7 @@ weatherLeaflet.show();
 const controls = document.getElementById("layerControls");
 
 if (controls) {
-  layers.forEach((layer) => {
+  weatherOL.layers().forEach((layer) => {
     const btn = document.createElement("button");
     btn.textContent = layer.name;
     btn.onclick = () => {

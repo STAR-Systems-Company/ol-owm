@@ -12,6 +12,7 @@ export declare class LeafletWeather {
     activeWind: boolean;
     constructor(map: LeafletMap, owmKey: string, properties?: Properties);
     status(): boolean;
+    windStatus(): boolean;
     layers(): {
         name: string;
         key: string;

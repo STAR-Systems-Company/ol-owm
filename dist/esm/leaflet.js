@@ -151,6 +151,9 @@ export class LeafletWeather {
     status() {
         return !!this.layerGroup;
     }
+    windStatus() {
+        return this.wind.getActive();
+    }
     layers() {
         return layers.map((x) => {
             return {

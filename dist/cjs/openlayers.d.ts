@@ -15,6 +15,7 @@ export declare class OpenLayersWeather {
     activeWind: boolean;
     constructor(map: OLMap, owmKey: string, properties?: Properties);
     status(): boolean;
+    windStatus(): boolean;
     layers(): {
         name: string;
         key: string;

@@ -105,6 +105,9 @@ export class OpenLayersWeather {
     status() {
         return !!this.layer;
     }
+    windStatus() {
+        return this.wind.getActive();
+    }
     layers() {
         return layers.map((x) => {
             return {

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OL Weather - Demo</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body,
+      #map {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      h2 {
+        margin: 0;
+        padding: 7px 0px;
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol/ol.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script type="module" crossorigin src="/assets/index-DrBaMTbK.js"></script>
+  </head>
+  <body>
+    <div
+      style="
+        display: flex;
+        width: 100%;
+        height: 100%;
+        gap: 14px;
+        padding: 0 14px 14px 14px;
+      "
+    >
+      <section
+        style="
+          width: 50%;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <h2>OpenLayers</h2>
+        <div
+          style="width: 100%; height: 100%; z-index: 1; padding: 0"
+          id="map-ol"
+        ></div>
+      </section>
+      <section
+        style="
+          width: 50%;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <h2>Leaflet</h2>
+        <div
+          style="width: 100%; height: 100%; z-index: 1"
+          id="map-leaflet"
+        ></div>
+      </section>
+    </div>
+
+    <div
+      id="layerControls"
+      style="
+        display: flex;
+        justify-content: center;
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        z-index: 2;
+        width: fit-content;
+        transform: translate(-50%, 0);
+        padding: 7px 14px;
+        border-radius: 14px;
+        background-color: #fff;
+      "
+    >
+      <button id="toggle-wind">Wind</button>
+    </div>
+  </body>
+</html>

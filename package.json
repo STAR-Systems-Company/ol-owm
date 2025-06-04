@@ -14,7 +14,8 @@
     "build": "tsc -p tsconfig.esm.json && tsc -p tsconfig.cjs.json && npm run copy-libs",
     "copy-libs": "cpx \"src/libs/**/*\" dist/esm/libs && cpx \"src/libs/**/*\" dist/cjs/libs",
     "prepare": "npm run build",
-    "dev": "vite"
+    "dev": "vite",
+    "build:demo": "vite build"
   },
   "files": [
     "dist"

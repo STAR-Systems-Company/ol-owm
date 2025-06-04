@@ -1,22 +1,30 @@
-'use strict';
+"use strict";
 
-var windCore = require('wind-core');
-var windGlCore = require('wind-gl-core');
-var L = require('leaflet');
-var rewind = require('@mapbox/geojson-rewind');
-var visEngine = require('@sakitam-gis/vis-engine');
-var glMatrix = require('gl-matrix');
+var windCore = require("wind-core");
+var windGlCore = require("wind-gl-core");
+var L = require("leaflet");
+var rewind = require("@mapbox/geojson-rewind");
+var visEngine = require("@sakitam-gis/vis-engine");
+var glMatrix = require("gl-matrix");
 
 function _interopNamespaceDefault(e) {
   var n = Object.create(null);
   if (e) {
     Object.keys(e).forEach(function (k) {
-      if (k !== 'default') {
+      if (k !== "default") {
         var d = Object.getOwnPropertyDescriptor(e, k);
-        Object.defineProperty(n, k, d.get ? d : {
-          enumerable: true,
-          get: function () { return e[k]; }
-        });
+        Object.defineProperty(
+          n,
+          k,
+          d.get
+            ? d
+            : {
+                enumerable: true,
+                get: function () {
+                  return e[k];
+                },
+              }
+        );
       }
     });
   }
@@ -24,7 +32,7 @@ function _interopNamespaceDefault(e) {
   return Object.freeze(n);
 }
 
-var L__namespace = /*#__PURE__*/_interopNamespaceDefault(L);
+var L__namespace = /*#__PURE__*/ _interopNamespaceDefault(L);
 
 class BaseLayer extends L__namespace.Layer {
   constructor(id, data, options) {
@@ -36,11 +44,17 @@ class BaseLayer extends L__namespace.Layer {
     }
     this._layerId = id;
     L__namespace.Util.setOptions(this, options);
-    this.devicePixelRatio = this.options.devicePixelRatio || // @ts-ignore 忽略错误
-    (window.devicePixelRatio || window.screen.deviceXDPI / window.screen.logicalXDPI);
+    this.devicePixelRatio =
+      this.options.devicePixelRatio || // @ts-ignore 忽略错误
+      window.devicePixelRatio ||
+      window.screen.deviceXDPI / window.screen.logicalXDPI;
   }
   _createCanvas(id, zIndex) {
-    const canvas = windCore.createCanvas(this._width, this._height, this.devicePixelRatio);
+    const canvas = windCore.createCanvas(
+      this._width,
+      this._height,
+      this.devicePixelRatio
+    );
     canvas.id = String(id);
     const panes = this._map.getPanes();
     if (panes && panes.overlayPane) {
@@ -70,7 +84,11 @@ class BaseLayer extends L__namespace.Layer {
   }
   _animateZoom(event) {
     const scale = this._map.getZoomScale(event.zoom, this._map.getZoom());
-    const offset = this._map._latLngToNewLayerPoint(this._map.getBounds().getNorthWest(), event.zoom, event.center);
+    const offset = this._map._latLngToNewLayerPoint(
+      this._map.getBounds().getNorthWest(),
+      event.zoom,
+      event.center
+    );
     L__namespace.DomUtil.setTransform(this.canvas, offset, scale);
   }
   _resizeCanvas(scale) {
@@ -80,14 +98,17 @@ class BaseLayer extends L__namespace.Layer {
   _redraw() {
     this._render();
   }
-  _render() {
-  }
+  _render() {}
   project(coordinate) {
-    const pixel = this._map.latLngToContainerPoint(new L__namespace.LatLng(coordinate[1], coordinate[0]));
+    const pixel = this._map.latLngToContainerPoint(
+      new L__namespace.LatLng(coordinate[1], coordinate[0])
+    );
     return [pixel.x * this.devicePixelRatio, pixel.y * this.devicePixelRatio];
   }
   unproject(pixel) {
-    const coordinates = this._map.containerPointToLatLng(new L__namespace.Point(pixel[0], pixel[1]));
+    const coordinates = this._map.containerPointToLatLng(
+      new L__namespace.Point(pixel[0], pixel[1])
+    );
     return [coordinates.lng, coordinates.lat];
   }
   intersectsCoordinate(coordinate) {
@@ -100,15 +121,18 @@ class BaseLayer extends L__namespace.Layer {
     this._width = size.x;
     this._height = size.y;
     this.canvas = this._createCanvas(this._layerId, this.options.zIndex || 1);
-    const animated = this._map.options.zoomAnimation && L__namespace.Browser.any3d;
-    L__namespace.DomUtil.addClass(this.canvas, "leaflet-zoom-" + (animated ? "animated" : "hide"));
+    const animated =
+      this._map.options.zoomAnimation && L__namespace.Browser.any3d;
+    L__namespace.DomUtil.addClass(
+      this.canvas,
+      "leaflet-zoom-" + (animated ? "animated" : "hide")
+    );
     this._map.on(this.getEvents(), this);
     this._resetView();
     this._render();
     return this;
   }
-  _resetView(e) {
-  }
+  _resetView(e) {}
   onMoveEnd() {
     this._reset();
   }
@@ -128,7 +152,7 @@ class BaseLayer extends L__namespace.Layer {
       moveend: this.onMoveEnd,
       // movestart: this._moveStart,
       zoomstart: this._render,
-      zoomend: this._render
+      zoomend: this._render,
       // zoomanim: undefined,
     };
     if (this._map.options.zoomAnimation && L__namespace.Browser.any3d) {
@@ -159,8 +183,7 @@ class WindLayer extends BaseLayer {
       this.wind.project = this.project.bind(this);
       this.wind.unproject = this.unproject.bind(this);
       this.wind.intersectsCoordinate = this.intersectsCoordinate.bind(this);
-      this.wind.postrender = () => {
-      };
+      this.wind.postrender = () => {};
     }
     this.wind.prerender();
     this.wind.render();
@@ -210,7 +233,7 @@ class WindLayer extends BaseLayer {
   setWindOptions(options) {
     const beforeOptions = this.options.windOptions || {};
     this.options = windCore.assign(this.options, {
-      windOptions: windCore.assign(beforeOptions, options || {})
+      windOptions: windCore.assign(beforeOptions, options || {}),
     });
     if (this.wind) {
       const windOptions = this.options.windOptions;
@@ -227,13 +250,18 @@ const { clamp } = visEngine.utils;
 const earthRadius = 63710088e-1;
 const earthCircumference = 2 * Math.PI * earthRadius;
 function circumferenceAtLatitude(latitude) {
-  return earthCircumference * Math.cos(latitude * Math.PI / 180);
+  return earthCircumference * Math.cos((latitude * Math.PI) / 180);
 }
 function mercatorXfromLng(lng) {
   return (180 + lng) / 360;
 }
 function mercatorYfromLat(lat) {
-  return (180 - 180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360))) / 360;
+  return (
+    (180 -
+      (180 / Math.PI) *
+        Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))) /
+    360
+  );
 }
 function mercatorZfromAltitude(altitude, lat) {
   return altitude / circumferenceAtLatitude(lat);
@@ -243,15 +271,19 @@ function lngFromMercatorX(x, wrap = 0) {
 }
 function latFromMercatorY(y) {
   const y2 = 180 - y * 360;
-  return 360 / Math.PI * Math.atan(Math.exp(y2 * Math.PI / 180)) - 90;
+  return (360 / Math.PI) * Math.atan(Math.exp((y2 * Math.PI) / 180)) - 90;
 }
 const MAX_MERCATOR_LATITUDE = 85.051129;
 function fromLngLat(lngLatLike, altitude = 0) {
-  const lat = clamp(lngLatLike.lat, -MAX_MERCATOR_LATITUDE, MAX_MERCATOR_LATITUDE);
+  const lat = clamp(
+    lngLatLike.lat,
+    -MAX_MERCATOR_LATITUDE,
+    MAX_MERCATOR_LATITUDE
+  );
   return {
     x: mercatorXfromLng(lngLatLike.lng),
     y: mercatorYfromLat(lat),
-    z: mercatorZfromAltitude(altitude, lat)
+    z: mercatorZfromAltitude(altitude, lat),
   };
 }
 function getCoordinatesCenterTileID(coords) {
@@ -272,9 +304,9 @@ function getCoordinatesCenterTileID(coords) {
   const tilesAtZoom = Math.pow(2, zoom);
   return {
     z: zoom,
-    x: Math.floor((minX + maxX) / 2 * tilesAtZoom),
-    y: Math.floor((minY + maxY) / 2 * tilesAtZoom),
-    extent: [minX, minY, maxX, maxY]
+    x: Math.floor(((minX + maxX) / 2) * tilesAtZoom),
+    y: Math.floor(((minY + maxY) / 2) * tilesAtZoom),
+    extent: [minX, minY, maxX, maxY],
   };
 }
 
@@ -295,7 +327,17 @@ class CameraSync {
     this.scene = scene;
     this.scene.matrixAutoUpdate = false;
     this.scene.worldMatrixNeedsUpdate = true;
-    this.camera = cameraType === "orthographic" ? new visEngine.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, nearZ, farZ) : new visEngine.PerspectiveCamera(fov, width / height, nearZ, farZ);
+    this.camera =
+      cameraType === "orthographic"
+        ? new visEngine.OrthographicCamera(
+            -width / 2,
+            width / 2,
+            height / 2,
+            -height / 2,
+            nearZ,
+            farZ
+          )
+        : new visEngine.PerspectiveCamera(fov, width / height, nearZ, farZ);
     this.camera.matrixAutoUpdate = false;
     this.camera.position.z = 600;
     this.setup();
@@ -305,12 +347,13 @@ class CameraSync {
     const maxPitch = degToRad(this.viewState.maxPitch);
     this.camera.aspect = width / height;
     this.halfFov = fov / 2;
-    this.cameraToCenterDistance = 0.5 / Math.tan(this.halfFov) * height;
+    this.cameraToCenterDistance = (0.5 / Math.tan(this.halfFov)) * height;
     this.acuteAngle = Math.PI / 2 - maxPitch;
     this.update();
   }
   update() {
-    const { width, height, elevation, _horizonShift, worldSize } = this.viewState;
+    const { width, height, elevation, _horizonShift, worldSize } =
+      this.viewState;
     const center = this.viewState.getCenter();
     const pitch = this.viewState.getPitch();
     const pitchRad = degToRad(pitch);
@@ -320,23 +363,46 @@ class CameraSync {
     const halfFov = fovRad / 2;
     const pitchAngle = Math.cos(Math.PI / 2 - pitchRad);
     const groundAngle = Math.PI / 2 + pitchRad;
-    this.cameraToCenterDistance = 0.5 / Math.tan(halfFov) * height;
+    this.cameraToCenterDistance = (0.5 / Math.tan(halfFov)) * height;
     const point = this.viewState.project(center);
     const rotateMap = new visEngine.Matrix4().fromRotationZ(Math.PI);
-    const scale = new visEngine.Matrix4().fromScale(new visEngine.Vector3(-worldSize, worldSize, worldSize));
-    const translateMap = new visEngine.Matrix4().fromTranslation(new visEngine.Vector3(-point.x, point.y, 0));
+    const scale = new visEngine.Matrix4().fromScale(
+      new visEngine.Vector3(-worldSize, worldSize, worldSize)
+    );
+    const translateMap = new visEngine.Matrix4().fromTranslation(
+      new visEngine.Vector3(-point.x, point.y, 0)
+    );
     const nz = height / 50;
     const nearZ = Math.max(nz * pitchAngle, nz);
-    const fovAboveCenter = fovRad * (0.5 + this.viewState.centerOffset().y / height);
-    const pixelsPerMeter = mercatorZfromAltitude(1, center.lat) * worldSize || 1;
-    const minElevationInPixels = elevation ? elevation.getMinElevationBelowMSL() * pixelsPerMeter : 0;
-    const cameraToSeaLevelDistance = (cameraPosition[2] * worldSize - minElevationInPixels) / Math.cos(pitchRad);
-    const topHalfSurfaceDistance = Math.sin(fovAboveCenter) * cameraToSeaLevelDistance / Math.sin(visEngine.utils.clamp(Math.PI - groundAngle - fovAboveCenter, 0.01, Math.PI - 0.01));
-    const furthestDistance = pitchAngle * topHalfSurfaceDistance + cameraToSeaLevelDistance;
+    const fovAboveCenter =
+      fovRad * (0.5 + this.viewState.centerOffset().y / height);
+    const pixelsPerMeter =
+      mercatorZfromAltitude(1, center.lat) * worldSize || 1;
+    const minElevationInPixels = elevation
+      ? elevation.getMinElevationBelowMSL() * pixelsPerMeter
+      : 0;
+    const cameraToSeaLevelDistance =
+      (cameraPosition[2] * worldSize - minElevationInPixels) /
+      Math.cos(pitchRad);
+    const topHalfSurfaceDistance =
+      (Math.sin(fovAboveCenter) * cameraToSeaLevelDistance) /
+      Math.sin(
+        visEngine.utils.clamp(
+          Math.PI - groundAngle - fovAboveCenter,
+          0.01,
+          Math.PI - 0.01
+        )
+      );
+    const furthestDistance =
+      pitchAngle * topHalfSurfaceDistance + cameraToSeaLevelDistance;
     const horizonDistance = cameraToSeaLevelDistance * (1 / _horizonShift);
     const farZ = Math.min(furthestDistance * 1.01, horizonDistance);
-    this.mercatorMatrix = new visEngine.Matrix4().scale(new visEngine.Vector3(worldSize, worldSize, worldSize / pixelsPerMeter));
-    const may = new visEngine.Matrix4().fromTranslation(new visEngine.Vector3(0, 0, this.cameraToCenterDistance));
+    this.mercatorMatrix = new visEngine.Matrix4().scale(
+      new visEngine.Vector3(worldSize, worldSize, worldSize / pixelsPerMeter)
+    );
+    const may = new visEngine.Matrix4().fromTranslation(
+      new visEngine.Vector3(0, 0, this.cameraToCenterDistance)
+    );
     this.labelPlaneMatrix = new visEngine.Matrix4();
     const m = new visEngine.Matrix4();
     m.scale(new visEngine.Vector3(1, -1, 1));
@@ -346,17 +412,35 @@ class CameraSync {
     this.camera.aspect = width / height;
     this.cameraTranslateZ = this.cameraToCenterDistance;
     if (this.camera instanceof visEngine.OrthographicCamera) {
-      this.camera.projectionMatrix.orthographic(-width / 2, width / 2, height / 2, -height / 2, nearZ, farZ);
+      this.camera.projectionMatrix.orthographic(
+        -width / 2,
+        width / 2,
+        height / 2,
+        -height / 2,
+        nearZ,
+        farZ
+      );
     } else {
-      this.camera.projectionMatrix.perspective(fovRad, width / height, nearZ, farZ);
+      this.camera.projectionMatrix.perspective(
+        fovRad,
+        width / height,
+        nearZ,
+        farZ
+      );
     }
-    const cameraWorldMatrix = new visEngine.Matrix4().premultiply(may).premultiply(new visEngine.Matrix4().fromRotationX(pitchRad)).premultiply(new visEngine.Matrix4().fromRotationZ(-degToRad(bearing)));
+    const cameraWorldMatrix = new visEngine.Matrix4()
+      .premultiply(may)
+      .premultiply(new visEngine.Matrix4().fromRotationX(pitchRad))
+      .premultiply(new visEngine.Matrix4().fromRotationZ(-degToRad(bearing)));
     if (elevation)
       cameraWorldMatrix.elements[14] = cameraPosition[2] * worldSize;
     this.camera.worldMatrix.copy(cameraWorldMatrix);
     this.camera.updateMatrixWorld();
     if (this.scene) {
-      this.scene.localMatrix = new visEngine.ProjectionMatrix().premultiply(rotateMap).premultiply(scale).premultiply(translateMap);
+      this.scene.localMatrix = new visEngine.ProjectionMatrix()
+        .premultiply(rotateMap)
+        .premultiply(scale)
+        .premultiply(translateMap);
     }
   }
 }
@@ -367,7 +451,7 @@ function getTileProjBounds(tileID) {
     left: tileID.wrapedX / numTiles,
     top: tileID.wrapedY / numTiles,
     right: (tileID.wrapedX + 1) / numTiles,
-    bottom: (tileID.wrapedY + 1) / numTiles
+    bottom: (tileID.wrapedY + 1) / numTiles,
   };
 }
 function getTileBounds(tileID) {
@@ -384,7 +468,12 @@ function getExtent(map) {
   const bounds = map?.getBounds();
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
-  const [xmin, ymin, xmax, ymax] = [southWest.lng, southWest.lat, northEast.lng, northEast.lat];
+  const [xmin, ymin, xmax, ymax] = [
+    southWest.lng,
+    southWest.lat,
+    northEast.lng,
+    northEast.lat,
+  ];
   const minY = Math.max(ymin, -MAX_MERCATOR_LATITUDE);
   const maxY = Math.min(ymax, MAX_MERCATOR_LATITUDE);
   const p0 = fromLngLat({ lng: xmin, lat: maxY });
@@ -421,7 +510,7 @@ class ViewState {
     return this._height;
   }
   get fov() {
-    return this.getFovRad() / Math.PI * 180;
+    return (this.getFovRad() / Math.PI) * 180;
   }
   get worldSize() {
     const scale = Math.pow(2, this.zoom - 1);
@@ -446,7 +535,11 @@ class ViewState {
     return { x: 0, y: 0 };
   }
   project(lnglat) {
-    const lat = visEngine.utils.clamp(lnglat.lat, -MAX_MERCATOR_LATITUDE, MAX_MERCATOR_LATITUDE);
+    const lat = visEngine.utils.clamp(
+      lnglat.lat,
+      -MAX_MERCATOR_LATITUDE,
+      MAX_MERCATOR_LATITUDE
+    );
     const x = mercatorXfromLng(lnglat.lng);
     const y = mercatorYfromLat(lat);
     return { x: x * this.worldSize, y: y * this.worldSize, z: 0 };
@@ -471,8 +564,8 @@ function wrapTile(x, range, includeMax) {
   const min = range[0];
   const d = max - min;
   return {
-    x: x === max && includeMax ? x : ((x - min) % d + d) % d + min,
-    wrap: Math.floor(x / max)
+    x: x === max && includeMax ? x : ((((x - min) % d) + d) % d) + min,
+    wrap: Math.floor(x / max),
   };
 }
 class WebglLayer extends BaseLayer {
@@ -497,7 +590,9 @@ class WebglLayer extends BaseLayer {
     return this.sync.camera;
   }
   getTileSize() {
-    const s = visEngine.utils.isNumber(this.source.tileSize) ? this.source.tileSize : this.source.tileSize?.[0] || 512;
+    const s = visEngine.utils.isNumber(this.source.tileSize)
+      ? this.source.tileSize
+      : this.source.tileSize?.[0] || 512;
     return new L__namespace.Point(s, s);
   }
   _redraw() {
@@ -505,7 +600,7 @@ class WebglLayer extends BaseLayer {
       const tileZoom = getClampZoom({
         zoom: this._map.getZoom(),
         minzoom: this.source.minZoom,
-        maxzoom: this.source.maxZoom
+        maxzoom: this.source.maxZoom,
       });
       if (tileZoom !== this._tileZoom) {
         this._tileZoom = tileZoom;
@@ -520,7 +615,7 @@ class WebglLayer extends BaseLayer {
         center: this._map.getCenter(),
         zoom: this._map.getZoom(),
         width: this._width,
-        height: this._height
+        height: this._height,
       });
     }
     if (!this.gl) {
@@ -530,7 +625,7 @@ class WebglLayer extends BaseLayer {
           preserveDrawingBuffer: false,
           antialias: true,
           // https://bugs.webkit.org/show_bug.cgi?id=237906
-          stencil: true
+          stencil: true,
         },
         true
       );
@@ -540,8 +635,8 @@ class WebglLayer extends BaseLayer {
           "OES_texture_float",
           "OES_texture_float_linear",
           "WEBGL_color_buffer_float",
-          "EXT_color_buffer_float"
-        ]
+          "EXT_color_buffer_float",
+        ],
       });
       this.scene = new visEngine.Scene();
       this.sync = new CameraSync(this.viewState, "perspective", this.scene);
@@ -550,7 +645,7 @@ class WebglLayer extends BaseLayer {
         this.source,
         {
           renderer: this.renderer,
-          scene: this.scene
+          scene: this.scene,
         },
         {
           renderType: this.options.renderType,
@@ -575,18 +670,27 @@ class WebglLayer extends BaseLayer {
             const y = this.canvas.clientHeight / 2 - pixel / 2;
             const x = this.canvas.clientWidth / 2 - pixel / 2;
             const left = fromLngLat(this.viewState.unproject([x, y]));
-            const right = fromLngLat(this.viewState.unproject([x + pixel, y + pixel]));
+            const right = fromLngLat(
+              this.viewState.unproject([x + pixel, y + pixel])
+            );
             return [Math.abs(right.x - left.x), Math.abs(left.y - right.y)];
           },
-          getPixelsToProjUnit: () => [this.viewState.pixelsPerMeter, this.viewState.pixelsPerMeter],
+          getPixelsToProjUnit: () => [
+            this.viewState.pixelsPerMeter,
+            this.viewState.pixelsPerMeter,
+          ],
           getViewTiles: (source, renderType) => {
             let { type } = source;
-            type = type !== windGlCore.LayerSourceType.timeline ? type : source.privateType;
-            if (!this._map)
-              return [];
+            type =
+              type !== windGlCore.LayerSourceType.timeline
+                ? type
+                : source.privateType;
+            if (!this._map) return [];
             const wrapTiles = [];
             if (type === windGlCore.LayerSourceType.image) {
-              const cornerCoords = source.coordinates.map((c) => fromLngLat({ lng: c[0], lat: c[1] }));
+              const cornerCoords = source.coordinates.map((c) =>
+                fromLngLat({ lng: c[0], lat: c[1] })
+              );
               const tileID = getCoordinatesCenterTileID(cornerCoords);
               if (source.wrapX) {
                 const x = tileID.x;
@@ -599,14 +703,14 @@ class WebglLayer extends BaseLayer {
                       source.coordinates[0][0],
                       source.coordinates[2][1],
                       source.coordinates[1][0],
-                      source.coordinates[0][1]
+                      source.coordinates[0][1],
                     ],
                     getTileProjBounds: () => ({
                       left: tileID.extent[0] + wrap,
                       top: tileID.extent[1],
                       right: tileID.extent[2] + wrap,
-                      bottom: tileID.extent[3]
-                    })
+                      bottom: tileID.extent[3],
+                    }),
                   })
                 );
               } else {
@@ -620,14 +724,14 @@ class WebglLayer extends BaseLayer {
                       source.coordinates[0][0],
                       source.coordinates[2][1],
                       source.coordinates[1][0],
-                      source.coordinates[0][1]
+                      source.coordinates[0][1],
                     ],
                     getTileProjBounds: () => ({
                       left: tileID.extent[0] + wrap,
                       top: tileID.extent[1],
                       right: tileID.extent[2] + wrap,
-                      bottom: tileID.extent[3]
-                    })
+                      bottom: tileID.extent[3],
+                    }),
                   })
                 );
               }
@@ -640,14 +744,14 @@ class WebglLayer extends BaseLayer {
                   wrapTiles.push(
                     new windGlCore.TileID(z, wrap, z, x, y, {
                       getTileBounds,
-                      getTileProjBounds
+                      getTileProjBounds,
                     })
                   );
                 } else if (tile.wrap === 0) {
                   wrapTiles.push(
                     new windGlCore.TileID(z, wrap, z, x, y, {
                       getTileBounds,
-                      getTileProjBounds
+                      getTileProjBounds,
                     })
                   );
                 }
@@ -658,8 +762,7 @@ class WebglLayer extends BaseLayer {
           getExtent: () => getExtent(this._map),
           getGridTiles: (source) => {
             const wrapX = source.wrapX;
-            if (!this._map)
-              return [];
+            if (!this._map) return [];
             const tiles = this._unLimitTiles;
             const wrapTiles = [];
             for (let i = 0; i < tiles.length; i++) {
@@ -669,20 +772,20 @@ class WebglLayer extends BaseLayer {
                 wrapTiles.push(
                   new windGlCore.TileID(z, wrap, z, x, y, {
                     getTileBounds,
-                    getTileProjBounds
+                    getTileProjBounds,
                   })
                 );
               } else if (tile.wrap === 0) {
                 wrapTiles.push(
                   new windGlCore.TileID(z, wrap, z, x, y, {
                     getTileBounds,
-                    getTileProjBounds
+                    getTileProjBounds,
                   })
                 );
               }
             }
             return wrapTiles;
-          }
+          },
         }
       );
     }
@@ -703,7 +806,7 @@ class WebglLayer extends BaseLayer {
     this.layer?.prerender({
       worlds,
       camera: this.camera,
-      planeCamera: this.planeCamera
+      planeCamera: this.planeCamera,
     });
   }
   glRender() {
@@ -714,7 +817,7 @@ class WebglLayer extends BaseLayer {
     this.layer?.render({
       worlds,
       camera: this.camera,
-      planeCamera: this.planeCamera
+      planeCamera: this.planeCamera,
     });
   }
   async picker(coordinates) {
@@ -734,7 +837,12 @@ class WebglLayer extends BaseLayer {
   }
   _resetView(e) {
     const animating = e && (e.pinch || e.flyTo);
-    this._setView(this._map.getCenter(), this._map.getZoom(), animating, animating);
+    this._setView(
+      this._map.getCenter(),
+      this._map.getZoom(),
+      animating,
+      animating
+    );
   }
   _resetGrid() {
     const map = this._map;
@@ -747,25 +855,29 @@ class WebglLayer extends BaseLayer {
     }
     this._wrapX = crs.wrapLng && [
       Math.floor(map.project([0, crs.wrapLng[0]], tileZoom).x / tileSize.x),
-      Math.ceil(map.project([0, crs.wrapLng[1]], tileZoom).x / tileSize.y)
+      Math.ceil(map.project([0, crs.wrapLng[1]], tileZoom).x / tileSize.y),
     ];
     this._wrapY = crs.wrapLat && [
       Math.floor(map.project([crs.wrapLat[0], 0], tileZoom).y / tileSize.x),
-      Math.ceil(map.project([crs.wrapLat[1], 0], tileZoom).y / tileSize.y)
+      Math.ceil(map.project([crs.wrapLat[1], 0], tileZoom).y / tileSize.y),
     ];
   }
   _setView(center, zoom, noPrune, noUpdate) {
     let tileZoom = Math.round(zoom);
-    if (this.options.maxZoom !== void 0 && tileZoom > this.options.maxZoom || this.options.minZoom !== void 0 && tileZoom < this.options.minZoom) {
+    if (
+      (this.options.maxZoom !== void 0 && tileZoom > this.options.maxZoom) ||
+      (this.options.minZoom !== void 0 && tileZoom < this.options.minZoom)
+    ) {
       tileZoom = void 0;
     } else {
       tileZoom = getClampZoom({
         minzoom: this.source.minZoom,
         maxzoom: this.source.maxZoom,
-        zoom: tileZoom
+        zoom: tileZoom,
       });
     }
-    const tileZoomChanged = this.options.updateWhenZooming && tileZoom !== this._tileZoom;
+    const tileZoomChanged =
+      this.options.updateWhenZooming && tileZoom !== this._tileZoom;
     if (!noUpdate || tileZoomChanged) {
       this._tileZoom = tileZoom;
       this._resetGrid();
@@ -795,17 +907,25 @@ class WebglLayer extends BaseLayer {
     const crs = this._map.options.crs;
     if (!crs.infinite) {
       const bounds = this._globalTileRange;
-      if (!crs.wrapLng && (coords.x < bounds.min.x || coords.x > bounds.max.x) || !crs.wrapLat && (coords.y < bounds.min.y || coords.y > bounds.max.y)) {
+      if (
+        (!crs.wrapLng &&
+          (coords.x < bounds.min.x || coords.x > bounds.max.x)) ||
+        (!crs.wrapLat && (coords.y < bounds.min.y || coords.y > bounds.max.y))
+      ) {
         return false;
       }
     }
     return true;
   }
   _wrapCoords(coords) {
-    const t = this._wrapX ? wrapTile(coords.x, this._wrapX) : { x: coords.x, wrap: 0 };
+    const t = this._wrapX
+      ? wrapTile(coords.x, this._wrapX)
+      : { x: coords.x, wrap: 0 };
     const newCoords = new L__namespace.Point(
       t.x,
-      this._wrapY && !this.source.wrapX ? L__namespace.Util.wrapNum(coords.y, this._wrapY) : coords.y
+      this._wrapY && !this.source.wrapX
+        ? L__namespace.Util.wrapNum(coords.y, this._wrapY)
+        : coords.y
     );
     newCoords.z = coords.z;
     newCoords.wrap = t.wrap;
@@ -819,7 +939,7 @@ class WebglLayer extends BaseLayer {
     const zoom = getClampZoom({
       zoom: map.getZoom(),
       minzoom: this.source.minZoom,
-      maxzoom: this.source.maxZoom
+      maxzoom: this.source.maxZoom,
     });
     if (center === void 0) {
       center = map.getCenter();
@@ -831,7 +951,14 @@ class WebglLayer extends BaseLayer {
     const tileRange = this._pxBoundsToTileRange(pixelBounds);
     const tileCenter = tileRange.getCenter();
     const queue = [];
-    if (!(isFinite(tileRange.min.x) && isFinite(tileRange.min.y) && isFinite(tileRange.max.x) && isFinite(tileRange.max.y))) {
+    if (
+      !(
+        isFinite(tileRange.min.x) &&
+        isFinite(tileRange.min.y) &&
+        isFinite(tileRange.max.x) &&
+        isFinite(tileRange.max.y)
+      )
+    ) {
       throw new Error("Attempted to load an infinite number of tiles");
     }
     if (Math.abs(zoom - this._tileZoom) > 1) {
@@ -874,11 +1001,16 @@ class WebglLayer extends BaseLayer {
   }
   _getTiledPixelBounds(center, zoom) {
     const map = this._map;
-    const mapZoom = map._animatingZoom ? Math.max(map._animateToZoom, map.getZoom()) : map.getZoom();
+    const mapZoom = map._animatingZoom
+      ? Math.max(map._animateToZoom, map.getZoom())
+      : map.getZoom();
     const scale = map.getZoomScale(mapZoom, zoom);
     const pixelCenter = map.project(center, zoom).floor();
     const halfSize = map.getSize().divideBy(scale * 2);
-    return new L__namespace.Bounds(pixelCenter.subtract(halfSize), pixelCenter.add(halfSize));
+    return new L__namespace.Bounds(
+      pixelCenter.subtract(halfSize),
+      pixelCenter.add(halfSize)
+    );
   }
   _pxBoundsToTileRange(bounds) {
     const tileSize = this.getTileSize();
@@ -919,7 +1051,7 @@ class WebglLayer extends BaseLayer {
       moveend: this.onMoveEnd,
       movestart: this.onMoveStart,
       zoom: this.handleZoom,
-      zoomend: this._reset
+      zoomend: this._reset,
     };
     if (this._map.options.zoomAnimation && L__namespace.Browser.any3d) {
       events.zoomanim = this._animateZoom;
@@ -929,7 +1061,7 @@ class WebglLayer extends BaseLayer {
   updateOptions(options) {
     this.options = {
       ...this.options,
-      ...options || {}
+      ...(options || {}),
     };
     if (this.layer) {
       this.layer.updateOptions(options);
@@ -967,8 +1099,8 @@ class WebglLayer extends BaseLayer {
             properties: {},
             geometry: {
               type: "Polygon",
-              coordinates: feature.geometry.coordinates.map((c) => tr(c))
-            }
+              coordinates: feature.geometry.coordinates.map((c) => tr(c)),
+            },
           });
         } else if (type === "MultiPolygon") {
           const css = [];
@@ -985,14 +1117,14 @@ class WebglLayer extends BaseLayer {
             properties: {},
             geometry: {
               type: "MultiPolygon",
-              coordinates: css
-            }
+              coordinates: css,
+            },
           });
         }
       }
       return {
         data: windGlCore.polygon2buffer(fs),
-        type: mask.type
+        type: mask.type,
       };
     }
   }
@@ -1026,48 +1158,69 @@ class WebglLayer extends BaseLayer {
 
 Object.defineProperty(exports, "Field", {
   enumerable: true,
-  get: function () { return windCore.Field; }
+  get: function () {
+    return windCore.Field;
+  },
 });
 Object.defineProperty(exports, "DecodeType", {
   enumerable: true,
-  get: function () { return windGlCore.DecodeType; }
+  get: function () {
+    return windGlCore.DecodeType;
+  },
 });
 Object.defineProperty(exports, "ImageSource", {
   enumerable: true,
-  get: function () { return windGlCore.ImageSource; }
+  get: function () {
+    return windGlCore.ImageSource;
+  },
 });
 Object.defineProperty(exports, "LayerSourceType", {
   enumerable: true,
-  get: function () { return windGlCore.LayerSourceType; }
+  get: function () {
+    return windGlCore.LayerSourceType;
+  },
 });
 Object.defineProperty(exports, "MaskType", {
   enumerable: true,
-  get: function () { return windGlCore.MaskType; }
+  get: function () {
+    return windGlCore.MaskType;
+  },
 });
 Object.defineProperty(exports, "RenderFrom", {
   enumerable: true,
-  get: function () { return windGlCore.RenderFrom; }
+  get: function () {
+    return windGlCore.RenderFrom;
+  },
 });
 Object.defineProperty(exports, "RenderType", {
   enumerable: true,
-  get: function () { return windGlCore.RenderType; }
+  get: function () {
+    return windGlCore.RenderType;
+  },
 });
 Object.defineProperty(exports, "TileID", {
   enumerable: true,
-  get: function () { return windGlCore.TileID; }
+  get: function () {
+    return windGlCore.TileID;
+  },
 });
 Object.defineProperty(exports, "TileSource", {
   enumerable: true,
-  get: function () { return windGlCore.TileSource; }
+  get: function () {
+    return windGlCore.TileSource;
+  },
 });
 Object.defineProperty(exports, "TimelineSource", {
   enumerable: true,
-  get: function () { return windGlCore.TimelineSource; }
+  get: function () {
+    return windGlCore.TimelineSource;
+  },
 });
 Object.defineProperty(exports, "configDeps", {
   enumerable: true,
-  get: function () { return windGlCore.configDeps; }
+  get: function () {
+    return windGlCore.configDeps;
+  },
 });
 exports.WebglLayer = WebglLayer;
 exports.WindLayer = WindLayer;
-//# sourceMappingURL=leaflet-wind.cjs.js.map

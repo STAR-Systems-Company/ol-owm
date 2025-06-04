@@ -312,4 +312,3 @@ class WindLayer extends Layer {
 }
 
 export { WindLayer };
-//# sourceMappingURL=ol-wind.esm.js.map

@@ -317,4 +317,3 @@ Object.defineProperty(exports, "Field", {
   get: function () { return windCore.Field; }
 });
 exports.WindLayer = WindLayer;
-//# sourceMappingURL=ol-wind.cjs.js.map

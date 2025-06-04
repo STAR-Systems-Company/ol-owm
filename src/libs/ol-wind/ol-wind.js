@@ -1143,4 +1143,3 @@
   exports.WindLayer = WindLayer;
 
 }));
-//# sourceMappingURL=ol-wind.js.map

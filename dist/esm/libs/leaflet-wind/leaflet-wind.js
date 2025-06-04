@@ -18555,4 +18555,3 @@ this.ifd0Offset: ${this.ifd0Offset}, file.byteLength: ${e2.byteLength}`), e2.tif
   exports.configDeps = configDeps;
 
 }));
-//# sourceMappingURL=leaflet-wind.js.map

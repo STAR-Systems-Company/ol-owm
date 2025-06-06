@@ -8,6 +8,7 @@ class WindAnimation {
         this.properties = properties;
         this.layer = null;
         this.zoomListenerKey = null;
+        this.active = false;
     }
     getActive() {
         return !!this.layer;
@@ -15,18 +16,15 @@ class WindAnimation {
     start(data) {
         var _a, _b;
         if (this.layer)
-            return true;
+            return;
         this.layer = (0, WindLayerFactory_1.createWindLayer)(this.map.type, data, {
             windOptions: {
-                // velocityScale,
-                // paths: 5000,
                 velocityScale: 0.03,
                 projection: ((_a = this.properties) === null || _a === void 0 ? void 0 : _a.projection) || "EPSG:4326",
                 colorScale: [((_b = this.properties) === null || _b === void 0 ? void 0 : _b.color) || "rgb(36,104, 180)"],
                 lineWidth: 1,
                 generateParticleOption: true,
                 fadeOpacity: 0.95,
-                // particleMultiplier: 3,
             },
             fieldOptions: { wrapX: false },
         });
@@ -42,7 +40,6 @@ class WindAnimation {
                 });
             }
         });
-        return true;
     }
     stop() {
         if (this.layer) {

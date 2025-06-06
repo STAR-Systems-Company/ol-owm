@@ -29,10 +29,6 @@ const weatherOL = new OpenLayersWeather(
   }
 );
 
-// weatherOL
-
-weatherOL.show();
-
 const mapLeaflet = L.map("map-leaflet").setView([50.4501, 30.5234], 7);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -53,7 +49,6 @@ const weatherLeaflet = new LeafletWeather(
     },
   }
 );
-weatherLeaflet.show();
 
 const controls = document.getElementById("layerControls");
 
@@ -78,10 +73,23 @@ if (controls) {
 }
 
 const toggleWindBtn = document.querySelector("#toggle-wind");
+const weatherON = document.querySelector("#weather-on");
+const weatherOFF = document.querySelector("#weather-off");
 
-if (toggleWindBtn) {
+if (toggleWindBtn)
   toggleWindBtn.addEventListener("click", () => {
     weatherOL.toggleWind();
     weatherLeaflet.toggleWind();
   });
-}
+
+if (weatherON)
+  weatherON.addEventListener("click", () => {
+    weatherOL.show();
+    weatherLeaflet.show();
+  });
+
+if (weatherOFF)
+  weatherOFF.addEventListener("click", () => {
+    weatherOL.hide();
+    weatherLeaflet.hide();
+  });

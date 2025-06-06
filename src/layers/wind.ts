@@ -6,6 +6,7 @@ import { createWindLayer } from "./WindLayerFactory";
 export class WindAnimation {
   private layer: WindLayerInstance | null = null;
   private zoomListenerKey: any = null;
+  public active: boolean = false;
 
   constructor(
     private map: MapAdapter,
@@ -15,19 +16,17 @@ export class WindAnimation {
   public getActive(): boolean {
     return !!this.layer;
   }
-  public start(data: any): boolean {
-    if (this.layer) return true;
+  public start(data: any): void {
+    if (this.layer) return;
+
     this.layer = createWindLayer(this.map.type, data, {
       windOptions: {
-        // velocityScale,
-        // paths: 5000,
         velocityScale: 0.03,
         projection: this.properties?.projection || "EPSG:4326",
         colorScale: [this.properties?.color || "rgb(36,104, 180)"],
         lineWidth: 1,
         generateParticleOption: true,
         fadeOpacity: 0.95,
-        // particleMultiplier: 3,
       },
       fieldOptions: { wrapX: false },
     });
@@ -48,8 +47,6 @@ export class WindAnimation {
         });
       }
     });
-
-    return true;
   }
 
   public stop(): boolean {

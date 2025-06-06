@@ -7,12 +7,13 @@ export declare class LeafletWeather {
     private layerGroup?;
     private popup;
     private activeTileLayer;
+    private windFetchController;
     private wind;
+    private activeCities;
     activeKey: string | null;
     activeWind: boolean;
     constructor(map: LeafletMap, owmKey: string, properties?: Properties);
     status(): boolean;
-    windStatus(): boolean;
     layers(): {
         name: string;
         key: string;

@@ -42,7 +42,9 @@ const defaultProperties = {
 };
 class OpenLayersWeather {
     constructor(map, owmKey, properties = defaultProperties) {
+        this.windFetchController = null;
         this.tileLayer = null;
+        this.activeCities = false;
         this.activeKey = null;
         this.activeWind = false;
         this.onMapClick = () => {
@@ -103,6 +105,7 @@ class OpenLayersWeather {
         this.map = map;
         this.owmKey = owmKey;
         this.properties = properties;
+        this.windFetchController = null;
         this.wind = new wind_1.WindAnimation(new ol_1.OpenLayersAdapter(map), properties.windProperties);
         this.onMoveEnd = () => {
             this.update();
@@ -110,9 +113,6 @@ class OpenLayersWeather {
     }
     status() {
         return !!this.layer;
-    }
-    windStatus() {
-        return this.wind.getActive();
     }
     layers() {
         return layers_1.layers.map((x) => {
@@ -153,19 +153,40 @@ class OpenLayersWeather {
     }
     toggleWind() {
         if (this.properties.windDataURL) {
-            if (!this.wind.getActive()) {
-                fetch(this.properties.windDataURL)
+            if (!this.activeWind) {
+                this.activeWind = true;
+                // отмена предыдущего запроса
+                if (this.windFetchController) {
+                    this.windFetchController.abort();
+                }
+                this.windFetchController = new AbortController();
+                fetch(this.properties.windDataURL, {
+                    signal: this.windFetchController.signal,
+                })
                     .then((r) => r.json())
                     .then((data) => {
-                    this.activeWind = this.wind.start(data);
+                    if (this.activeWind) {
+                        this.wind.start(data);
+                    }
+                })
+                    .catch((e) => {
+                    if (e.name !== "AbortError")
+                        console.warn("Ошибка ветра:", e);
                 });
             }
             else {
-                this.activeWind = this.wind.stop();
+                this.activeWind = false;
+                this.wind.stop();
+                // отмена fetch, если ещё идёт
+                if (this.windFetchController) {
+                    this.windFetchController.abort();
+                    this.windFetchController = null;
+                }
             }
         }
     }
     async show() {
+        this.activeCities = true;
         this.doubleClickZoom = this.map
             .getInteractions()
             .getArray()
@@ -195,6 +216,7 @@ class OpenLayersWeather {
         await this.update();
     }
     hide() {
+        this.activeCities = false;
         this.map.un("dblclick", this.onMapDoubleClick);
         this.map.un("click", this.onMapClick);
         if (this.popupOverlay) {
@@ -237,6 +259,8 @@ class OpenLayersWeather {
             }
         }
         await Promise.all(requests);
+        if (!this.activeCities)
+            return;
         const source = new Vector_2.default({
             features,
         });

@@ -54,8 +54,11 @@ export class OpenLayersWeather {
   private doubleClickZoom?: DoubleClickZoom;
   private layer?: VectorLayer;
   private onMoveEnd: () => void;
+  private windFetchController: AbortController | null = null;
   private wind: WindAnimation;
   private tileLayer: TileLayer | null = null;
+  private activeCities: boolean = false;
+
   public activeKey: string | null = null;
   public activeWind: boolean = false;
 
@@ -67,6 +70,7 @@ export class OpenLayersWeather {
     this.map = map;
     this.owmKey = owmKey;
     this.properties = properties;
+    this.windFetchController = null;
     this.wind = new WindAnimation(
       new OpenLayersAdapter(map),
       properties.windProperties
@@ -125,19 +129,44 @@ export class OpenLayersWeather {
 
   toggleWind() {
     if (this.properties.windDataURL) {
-      if (!this.wind.getActive()) {
-        fetch(this.properties.windDataURL)
+      if (!this.activeWind) {
+        this.activeWind = true;
+
+        // отмена предыдущего запроса
+        if (this.windFetchController) {
+          this.windFetchController.abort();
+        }
+
+        this.windFetchController = new AbortController();
+
+        fetch(this.properties.windDataURL, {
+          signal: this.windFetchController.signal,
+        })
           .then((r) => r.json())
           .then((data) => {
-            this.activeWind = this.wind.start(data);
+            if (this.activeWind) {
+              this.wind.start(data);
+            }
+          })
+          .catch((e) => {
+            if (e.name !== "AbortError") console.warn("Ошибка ветра:", e);
           });
       } else {
-        this.activeWind = this.wind.stop();
+        this.activeWind = false;
+        this.wind.stop();
+
+        // отмена fetch, если ещё идёт
+        if (this.windFetchController) {
+          this.windFetchController.abort();
+          this.windFetchController = null;
+        }
       }
     }
   }
 
   async show() {
+    this.activeCities = true;
+
     this.doubleClickZoom = this.map
       .getInteractions()
       .getArray()
@@ -173,6 +202,8 @@ export class OpenLayersWeather {
   }
 
   hide() {
+    this.activeCities = false;
+
     this.map.un("dblclick", this.onMapDoubleClick);
     this.map.un("click", this.onMapClick);
 
@@ -224,6 +255,8 @@ export class OpenLayersWeather {
     }
 
     await Promise.all(requests);
+
+    if (!this.activeCities) return;
 
     const source = new VectorSource({
       features,

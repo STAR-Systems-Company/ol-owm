@@ -33,6 +33,8 @@ function formatUnixTime(timestamp, timezoneOffset) {
 class LeafletWeather {
     constructor(map, owmKey, properties = defaultProperties) {
         this.activeTileLayer = null;
+        this.windFetchController = null;
+        this.activeCities = false;
         this.activeKey = null;
         this.activeWind = false;
         this.update = async () => {
@@ -57,6 +59,8 @@ class LeafletWeather {
                 }
             }
             await Promise.all(requests);
+            if (!this.activeCities)
+                return;
             if (this.layerGroup) {
                 this.layerGroup.clearLayers();
             }
@@ -157,9 +161,6 @@ class LeafletWeather {
     status() {
         return !!this.layerGroup;
     }
-    windStatus() {
-        return this.wind.getActive();
-    }
     layers() {
         return layers_1.layers.map((x) => {
             return {
@@ -201,19 +202,40 @@ class LeafletWeather {
     }
     toggleWind() {
         if (this.properties.windDataURL) {
-            if (!this.wind.getActive()) {
-                fetch(this.properties.windDataURL)
+            if (!this.activeWind) {
+                this.activeWind = true;
+                // отмена предыдущего запроса
+                if (this.windFetchController) {
+                    this.windFetchController.abort();
+                }
+                this.windFetchController = new AbortController();
+                fetch(this.properties.windDataURL, {
+                    signal: this.windFetchController.signal,
+                })
                     .then((r) => r.json())
                     .then((data) => {
-                    this.activeWind = this.wind.start(data);
+                    if (this.activeWind) {
+                        this.wind.start(data);
+                    }
+                })
+                    .catch((e) => {
+                    if (e.name !== "AbortError")
+                        console.warn("Ошибка ветра:", e);
                 });
             }
             else {
-                this.activeWind = this.wind.stop();
+                this.activeWind = false;
+                this.wind.stop();
+                // отмена fetch, если ещё идёт
+                if (this.windFetchController) {
+                    this.windFetchController.abort();
+                    this.windFetchController = null;
+                }
             }
         }
     }
     async show() {
+        this.activeCities = true;
         this.map.doubleClickZoom.disable();
         this.map.on("moveend", this.update);
         this.map.on("dblclick", this.onMapDoubleClick);
@@ -223,6 +245,7 @@ class LeafletWeather {
         await this.update();
     }
     hide() {
+        this.activeCities = false;
         this.map.doubleClickZoom.enable();
         this.map.off("moveend", this.update);
         this.map.off("dblclick", this.onMapDoubleClick);

@@ -5,8 +5,9 @@ export declare class WindAnimation {
     private properties;
     private layer;
     private zoomListenerKey;
+    active: boolean;
     constructor(map: MapAdapter, properties: WindProperties | undefined);
     getActive(): boolean;
-    start(data: any): boolean;
+    start(data: any): void;
     stop(): boolean;
 }

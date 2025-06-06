@@ -9,13 +9,14 @@ export declare class OpenLayersWeather {
     private doubleClickZoom?;
     private layer?;
     private onMoveEnd;
+    private windFetchController;
     private wind;
     private tileLayer;
+    private activeCities;
     activeKey: string | null;
     activeWind: boolean;
     constructor(map: OLMap, owmKey: string, properties?: Properties);
     status(): boolean;
-    windStatus(): boolean;
     layers(): {
         name: string;
         key: string;

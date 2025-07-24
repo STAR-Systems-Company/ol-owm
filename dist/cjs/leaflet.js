@@ -61,12 +61,11 @@ class LeafletWeather {
             await Promise.all(requests);
             if (!this.activeCities)
                 return;
-            if (this.layerGroup) {
-                this.layerGroup.clearLayers();
+            if (!this.layerGroup || !this.map.hasLayer(this.layerGroup)) {
+                this.layerGroup = leaflet_1.default.layerGroup().addTo(this.map);
             }
             else {
-                this.layerGroup = leaflet_1.default.layerGroup();
-                this.map.addLayer(this.layerGroup);
+                this.layerGroup.clearLayers();
             }
             for (const feature of features) {
                 const { geometry, properties } = feature;
@@ -251,6 +250,7 @@ class LeafletWeather {
         this.map.off("dblclick", this.onMapDoubleClick);
         if (this.layerGroup) {
             this.map.removeLayer(this.layerGroup);
+            this.layerGroup = undefined; // <- вот эта строчка
         }
     }
 }

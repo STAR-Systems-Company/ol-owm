@@ -170,6 +170,7 @@ export class LeafletWeather {
     this.map.off("dblclick", this.onMapDoubleClick);
     if (this.layerGroup) {
       this.map.removeLayer(this.layerGroup);
+      this.layerGroup = undefined; // <- вот эта строчка
     }
   }
 
@@ -203,11 +204,10 @@ export class LeafletWeather {
 
     if (!this.activeCities) return;
 
-    if (this.layerGroup) {
-      this.layerGroup.clearLayers();
+    if (!this.layerGroup || !this.map.hasLayer(this.layerGroup)) {
+      this.layerGroup = L.layerGroup().addTo(this.map);
     } else {
-      this.layerGroup = L.layerGroup();
-      this.map.addLayer(this.layerGroup);
+      this.layerGroup.clearLayers();
     }
 
     for (const feature of features) {

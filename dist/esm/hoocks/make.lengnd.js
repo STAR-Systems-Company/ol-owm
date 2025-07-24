@@ -37,6 +37,7 @@ export const makeLegend = (prefix, id, layerData) => {
     legendBox.addEventListener("mousemove", (e) => {
         const rect = legendBox.getBoundingClientRect();
         const percent = ((e.clientX - rect.left) / rect.width) * 100;
+        // Вычисляем текст внутри popup
         const unit = _UNITS[layerData.key] || "%";
         const range = _RANGES[layerData.key];
         if (range) {
@@ -47,9 +48,18 @@ export const makeLegend = (prefix, id, layerData) => {
         else {
             popup.innerText = `${percent.toFixed(1)}${unit}`;
         }
-        popup.style.left = `${percent}%`;
-        popup.style.transform = "translateX(-50%)";
+        // Показываем popup перед измерением
         popup.style.display = "block";
+        // Ширина popup и его "половина"
+        const popupWidth = popup.offsetWidth;
+        const half = popupWidth / 2;
+        // Координата курсора внутри legendBox
+        let x = e.clientX - rect.left;
+        // Клаппим её, чтобы popup не выходил за границы
+        x = Math.max(half, Math.min(x, rect.width - half));
+        // Устанавливаем позицию в пикселях и центрируем
+        popup.style.left = `${x}px`;
+        popup.style.transform = "translateX(-50%)";
     });
     legendBox.addEventListener("mouseleave", () => {
         popup.style.display = "none";
